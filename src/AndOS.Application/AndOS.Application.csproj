@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AndOS.Shared" Version="1.0.0" />
+    <PackageReference Include="AndOS.Shared" Version="1.0.0">
+      <PackageSource>https://nuget.pkg.github.com/AndersonCosta28/index.json</PackageSource>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

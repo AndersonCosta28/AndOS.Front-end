@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AndOS.Core" Version="1.0.0" />
+    <PackageReference Include="AndOS.Core" Version="1.0.0">
+        <PackageSource>https://nuget.pkg.github.com/AndersonCosta28/index.json</PackageSource>
+    </PackageReference>
     <PackageReference Include="Blazor.Bootstrap" Version="2.2.1" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
