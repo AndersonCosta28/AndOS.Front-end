@@ -21,7 +21,7 @@ jobs:
           lfs: false
           
       - name: Add AndOS nuget
-        run: dotnet nuget add source --username AndersonCosta28 --password ${{ secrets.PAT_WORKFLOW }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/AndersonCosta28/index.json"
+        run: dotnet nuget add source --username AndersonCosta28 --password ${{ secrets.PAT_WORKFLOW }} --store-password-in-clear-text --name github https://nuget.pkg.github.com/AndersonCosta28/index.json
           
       - name: Build And Deploy
         id: builddeploy
