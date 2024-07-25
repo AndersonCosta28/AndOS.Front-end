@@ -8,6 +8,8 @@ on:
     types: [opened, synchronize, reopened, closed]
     branches:
       - master
+env:
+  AND_OS_TOKEN: ${{ secrets.PAT_WORKFLOW }}
 
 jobs:
   build_and_deploy_job:
@@ -15,9 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - name: Add AndOS nuget
-        run: dotnet nuget add source --username AndersonCosta28 --password ${{ secrets.PAT_WORKFLOW }} --store-password-in-clear-text --name github https://nuget.pkg.github.com/AndersonCosta28/index.json
-          
       - uses: actions/checkout@v4
         with:
           submodules: true
