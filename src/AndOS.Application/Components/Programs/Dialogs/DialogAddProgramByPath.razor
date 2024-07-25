@@ -1,0 +1,137 @@
+﻿@using AndOS.Domain.Enums
+@inject ILogger<DialogAddProgramByPath> Logger
+@inject IProgramManager ProgramManager
+@inject IToastService ToastService
+@inject IDialogService IDialogService
+@implements IDialogContentComponent
+@namespace AndOS.Application.Components.Programs.Dialogs
+
+<FluentDialogHeader>
+    <FluentLabel Typo="Typography.H2">Add program</FluentLabel>
+</FluentDialogHeader>
+<FluentDialogBody>
+    <FluentInputFile @ref="@UploadProgram" DragDropZoneVisible="false" AnchorId="UploadProgram"
+        Mode="InputFileMode.SaveToTemporaryFolder" OnProgressChange="@(e =>
+                     {
+                         progressPercent = e.ProgressPercent;
+                         progressTitle = e.ProgressTitle;
+                     })" OnCompleted="@OnCompleted" Accept=".dll" />
+    <FluentProgress Min="0" Max="100" Visible="@(progressPercent > 0)" Value="@progressPercent" />
+    <FluentLabel Alignment="HorizontalAlignment.Center">
+        @progressTitle
+    </FluentLabel>
+
+    <FluentButton Id="UploadProgram" Appearance="Appearance.Accent">
+        Upload files
+    </FluentButton>
+
+    @if (Files.Any())
+    {
+        <h4>File(s) uploaded:</h4>
+        <ul>
+            @foreach (var file in Files)
+            {
+                <li>
+                    <b>@file.Name</b> 🔹
+                    @($"{Decimal.Divide(file.Size, 1024):N} KB") 🔹
+                    @file.ErrorMessage
+                </li>
+            }
+        </ul>
+    }
+</FluentDialogBody>
+<FluentDialogFooter>
+    @if (conflictVersion)
+    {
+        @if (compareVersion == ResultCompareVersion.Equal)
+        {
+            <p>Same version</p>
+            <FluentButton Disabled=disableSubmit Loading=@loading Style="background-color: yellow" OnClick=Submit>Replace
+            </FluentButton>
+        }
+
+        @if (compareVersion == ResultCompareVersion.Lower)
+        {
+            <p>Lower version</p>
+            <FluentButton Disabled=disableSubmit Style="background-color: red" Loading=@loading OnClick=Submit>Downgrade
+            </FluentButton>
+        }
+
+        @if (compareVersion == ResultCompareVersion.Higher)
+        {
+            <p>Higher version</p>
+            <FluentButton Disabled=disableSubmit Loading=@loading OnClick=Submit>Upgrade</FluentButton>
+        }
+    }
+    @if (!conflictVersion && validModule)
+    {
+        <FluentButton Disabled=disableSubmit Loading=@loading OnClick=Submit>Install</FluentButton>
+    }
+</FluentDialogFooter>
+@code {
+    [CascadingParameter] public FluentDialog Dialog { get; set; }
+    FluentInputFile UploadProgram = default!;
+    int progressPercent;
+    string progressTitle;
+    FluentInputFileEventArgs[] Files = Array.Empty<FluentInputFileEventArgs>();
+
+    bool conflictVersion = false;
+    ResultCompareVersion compareVersion;
+    bool validModule = false;
+    bool loading;
+    bool disableSubmit => binaryData.Length == 0;
+    byte[] binaryData = [];
+
+    async Task Submit()
+    {
+        try
+        {
+            loading = true;
+            if (conflictVersion)
+            {
+                Assembly assembly = Assembly.Load(binaryData);
+                await ProgramManager.RemoveExternalAssemblyAsync(assembly);
+            }
+            await ProgramManager.AddExternalProgramAsync(binaryData);
+            await Dialog.CloseAsync();
+        }
+        catch (Exception e)
+        {
+            Logger.Log(LogLevel.Error, null, e);
+            ToastService.ShowError(e.Message);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    void OnCompleted(IEnumerable<FluentInputFileEventArgs> files)
+    {
+        Files = files.ToArray();
+        if (Files.Length == 0)
+            return;
+        progressPercent = UploadProgram!.ProgressPercent;
+        progressTitle = UploadProgram!.ProgressTitle;
+
+        Assembly assembly = Assembly.LoadFile(Files.ElementAt(0).LocalFile.FullName);
+        validModule = ProgramManager.IsValidModule(assembly);
+        if (!validModule)
+        {
+            ToastService.ShowError("Module invalid");
+            return;
+        }
+        conflictVersion = ProgramManager.VerifyIfExistsAssembly(assembly, out var assemblyExisting);
+        if (conflictVersion)
+            compareVersion = ProgramManager.CheckVersionAssembly(assemblyExisting, assembly);
+
+        binaryData = File.ReadAllBytes(Files.ElementAt(0).LocalFile.FullName);
+
+        // For the demo, delete these files.
+        foreach (var file in Files)
+        {
+            file.LocalFile?.Delete();
+        }
+
+    }
+}

@@ -1,0 +1,29 @@
+﻿@inject IProgramManager ProgramManager
+@implements IDisposable
+@namespace AndOS.Application.Components.Programs
+<div style="padding: 10px"> 
+    @foreach (var program in ProgramManager.Programs)
+    {
+        <ProgramItemComponent Content="program" @key=program />
+    }
+</div>
+@code {
+
+    Task RefreshAsync(Program program)
+    {
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    protected override void OnInitialized()
+    {
+        ProgramManager.OnInstall += RefreshAsync;
+        ProgramManager.OnUninstall += RefreshAsync;
+    }
+
+    public void Dispose()
+    {
+        ProgramManager.OnInstall -= RefreshAsync;
+        ProgramManager.OnUninstall -= RefreshAsync;
+    }
+}

@@ -1,0 +1,24 @@
+﻿@namespace AndOS.Module.UserConfiguration.Components.Accounts.Dialogs.Partials
+@using AndOS.Core.StorageConfigs
+<FluentLabel>Url</FluentLabel>
+<p>@Content.Url</p>
+<br />
+<br />
+<FluentCheckbox @bind-Value=Content.IsAzurite Label="Is Azurite (test)" />
+<FluentTextArea @bind-Value=Content.ContainerName Label="Container name" Style="width: 90%" />
+<br />
+<br />
+<FluentTextArea @bind-Value=Content.AccountName Label="Account name" Style="width: 90%" />
+<br />
+<br />
+<FluentTextArea @bind-Value=Content.AccountKey Label="Account key" Style="width: 90%" />
+<br />
+<br />
+<FluentTextArea @bind-Value=Content.DefaultEndpointsProtocol Label="Default endpoints protocol" Style="width: 90%" />
+<br />
+<br />
+<FluentTextArea @bind-Value=Content.EndpointSuffix Label="Endpoint Suffix" Style="width: 90%" />
+@code {
+    string url => Content.Url;
+    [Parameter] public AzureBlobStorageConfig Content { get; set; } = default!;
+}

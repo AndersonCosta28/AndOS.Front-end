@@ -1,0 +1,53 @@
+﻿@using AndOS.Application.Interfaces
+@using System.Text.Json
+@using AndOS.Shared.Requests.Folders.Update.Rename
+@inject ILogger<DialogRenameFolder> Logger
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject IFolderService FolderService
+@implements IDialogContentComponent<ChildrenFolderDTO>
+@namespace AndOS.Module.FileExplorer.Components.Folder.Dialogs.Rename
+
+<FluentDialogHeader>
+    <FluentLabel Typo="Typography.H4">Rename folder</FluentLabel>
+</FluentDialogHeader>
+<FluentDialogBody>
+    <FluentTextField @bind-Value=name Name="Name" Label="New name" />
+</FluentDialogBody>
+<FluentDialogFooter>
+    <FluentButton Loading=loading OnClick=Submit Appearance="Appearance.Accent">Save</FluentButton>
+</FluentDialogFooter>
+
+@code {
+    [Parameter] public ChildrenFolderDTO Content { get; set; }
+    [CascadingParameter] public FluentDialog Dialog { get; set; }
+    bool loading = false;
+    private string name;
+
+    protected override void OnInitialized()
+    {
+        name = Content.Name;
+        base.OnInitialized();
+    }
+
+    async Task Submit()
+    {
+        try
+        {
+            loading = true;
+            RenameFolderRequest request = new(Content.Id, name.Trim());
+            await FolderService.RenameAsync(request);
+            Content.Name = name;
+            await Dialog.CloseAsync();
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(null, e);
+            ToastService.ShowError("Error create folder:\n" + e.Message);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

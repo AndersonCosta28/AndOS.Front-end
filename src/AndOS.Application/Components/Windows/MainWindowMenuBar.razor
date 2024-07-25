@@ -1,0 +1,61 @@
+﻿@namespace AndOS.Application.Components.Windows
+
+
+@if (_mainMenuBarItems is { Count: > 0 })
+{
+    <div class="main_menu_bar">
+        <FluentStack Style="width: 100%;" Orientation="Orientation.Horizontal">
+            @foreach (var mainMenuBarItem in _mainMenuBarItems)
+            {
+                <FluentButton Id="@($"{idMainMenuBar}-{mainMenuBarItem.Key}")" Appearance="Appearance.Outline"
+                              @key=mainMenuBarItem OnClick="() => {
+                                            menusItemMainMenuBarVisible[mainMenuBarItem.Key] = !menusItemMainMenuBarVisible[mainMenuBarItem.Key];
+                                          }">
+                    @mainMenuBarItem.Key
+                </FluentButton>
+            }
+        </FluentStack>
+
+        @foreach (var mainMenuBarItem in _mainMenuBarItems)
+        {
+            <FluentMenu Anchor="@($"{idMainMenuBar}-{mainMenuBarItem.Key}")" HorizontalPosition="HorizontalPosition.End"
+                        Anchored=true @bind-Open="menusItemMainMenuBarVisible[mainMenuBarItem.Key]" @key=mainMenuBarItem>
+                @foreach (var menuItem in mainMenuBarItem.Value)
+                {
+                    <RecursiveMenuComponent RootMenuItem="@menuItem" @key=menuItem />
+                }
+            </FluentMenu>
+        }
+
+    </div>
+}
+@code {
+    private string idMainMenuBar => $"{Id}-main-menu-bar";
+    private Dictionary<string, bool> menusItemMainMenuBarVisible = [];
+    [Parameter] public Dictionary<string, List<MenuItem>> MainMenuBarItems { get; set; } = [];
+    [Parameter] public Guid Id { get; set; }
+    Dictionary<string, List<MenuItem>> _mainMenuBarItems;
+
+    protected override void OnInitialized()
+    {
+        Update();
+        base.OnInitialized();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (MainMenuBarItems == _mainMenuBarItems)
+            return;
+
+        Update();
+    }
+
+    void Update()
+    {
+        _mainMenuBarItems = MainMenuBarItems ?? [];
+        menusItemMainMenuBarVisible = [];
+        if (_mainMenuBarItems is not null)
+            foreach (var mainMenuBarItem in _mainMenuBarItems)
+                menusItemMainMenuBarVisible.Add(mainMenuBarItem.Key, false);
+    }
+}

@@ -1,0 +1,57 @@
+﻿@namespace AndOS.Module.FileExplorer.Components.File.Dialogs
+@using AndOS.Core.Schemas
+@using AndOS.Application.Interfaces
+@using AndOS.Shared.Requests.Files.Update.Rename
+@using System.Text.Json
+@inject ILogger<DialogRenameFile> Logger
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject IFileService FileService
+@implements IDialogContentComponent<ChildrenFileDTO>
+
+<FluentDialogHeader>
+    <FluentLabel Typo="Typography.H4">Rename folder</FluentLabel>
+</FluentDialogHeader>
+<FluentDialogBody>
+    <FluentTextField @bind-Value=name Name="Name" Label="New name" Pattern="@FileSchema.RegexName" Minlength="@FileSchema.MinLenghtName" Maxlength="@FileSchema.MaxLenghtName" />
+    <FluentTextField @bind-Value=extension Name="Extension" Label="New extension" Pattern="@FileSchema.RegexExtension" Minlength="@FileSchema.MinLenghtExtension" Maxlength="@FileSchema.MaxLenghtExtension" />
+</FluentDialogBody>
+<FluentDialogFooter>
+    <FluentButton Loading=loading OnClick=Submit Appearance="Appearance.Accent">Save</FluentButton>
+</FluentDialogFooter>
+
+@code {
+    [Parameter] public ChildrenFileDTO Content { get; set; }
+    [CascadingParameter] public FluentDialog Dialog { get; set; }
+    bool loading = false;
+
+    private string name;
+    private string extension;
+    protected override void OnInitialized()
+    {
+        name = Content.Name;
+        extension = Content.Extension;
+        base.OnInitialized();
+    }
+
+    async Task Submit()
+    {
+        try
+        {
+            loading = true;
+            RenameFileRequest request = new(Content.Id, name.Trim(), extension.Trim());
+            await FileService.RenameAsync(request);
+            Content.Name = name;
+            await Dialog.CloseAsync();
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(null, e);
+            ToastService.ShowError("Error create File:\n" + e.Message);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

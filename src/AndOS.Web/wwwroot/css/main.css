@@ -1,0 +1,15 @@
+﻿:root {
+    --window-header-bg-color: #e0e0e0; /* Fundo claro para o cabeçalho */
+    --window-header-focused-bg-color: #0078d4; /* Cor azul do tema Fluent UI para o cabeçalho focado */
+    --window-border-color: #c8c8c8; /* Borda clara */
+    --window-shadow-color: rgba(0, 0, 0, 0.1); /* Sombra suave */
+    --window-header-height: 60px; /* Altura do cabeçalho */
+    --window-header-radius: 10px; /* Arredondamento nas bordas do cabeçalho */
+
+    --taskbar-height: 60px; /* Altura da barra de tarefas */
+    --taskbar-bg-color: #f0f0f0; /* Fundo claro da barra de tarefas */
+    --taskbar-border-color: #c8c8c8; /* Borda clara da barra de tarefas */
+    --taskbar-shadow-color: rgba(0, 0, 0, 0.1); /* Sombra suave da barra de tarefas */
+    
+    --topbar-clock-color: #333; /* Cor do texto do relógio */
+}

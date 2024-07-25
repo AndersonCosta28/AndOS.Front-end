@@ -1,0 +1,301 @@
+﻿@inject ILogger<WindowItemComponent> Logger
+@inherits AndOSBaseComponent
+@namespace AndOS.Application.Components.Windows
+
+@using AndOS.Application.Structs
+@using AndOS.Application.Components.Programs
+@if (Content.Window.Hide) { }
+else
+{
+    <div onclick="event.preventDefault();" @ref=_container class="@(Content.Window.Focused ? "rz-shadow-10" : null)" style="
+                min-height: 100px;
+                min-width: 100px;
+                left: @Content.Window.Left;
+                top: @Content.Window.Top;
+                width: @Content.Window.Width;
+                height: @Content.Window.Height;
+                resize: @(Content.Window.Resize ? "both" : "none");
+                z-index: @Content.Window.Index;
+                overflow: @(Content.Window.Resize ? "auto" : "unset");
+                position: absolute;" @oncontextmenu=ShowMenuItemsAsync>
+        <div @ref=_subContainer class="window_container" @onclick="Focus">
+            <div @ref=_headerReference
+                 class="window_container_header @(Content.Window.Focused ? "window_container_header_focused" : null)"
+                 style="border-radius: @(Content.Window.FullScreen ? "0px" : "10px 10px 0px 0px");">
+                <div class="window_container_header_left" style="cursor: @(Content.Window.FullScreen ? "auto" : "all-scroll");"
+                     @ref=_headerLeftReference oncontextmenu="event.preventDefault();event.stopPropagation()">
+                    <FluentLabel Typo="Typography.PageTitle">@_title</FluentLabel>
+                </div>
+                <div class="window_container_header_right">
+                    <div class="window_container_header_right_option" action="hide" @onclick=Hide>
+                        <FluentIcon Value="@(new Icons.Regular.Size20.Subtract())" Color="Color.Custom"
+                                    CustomColor="#fff" />
+                    </div>
+                    @if (Content.Window.FullScreen)
+                    {
+                        <div class="window_container_header_right_option" action="fullscreen" @onclick=CloseFullScreen>
+                            <FluentIcon Value="@(new Icons.Regular.Size20.FullScreenMinimize())" Color="Color.Custom"
+                                        CustomColor="#fff" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="window_container_header_right_option" action="fullscreen" @onclick=FullScreen>
+                            <FluentIcon Value="@(new Icons.Regular.Size20.FullScreenMaximize())" Color="Color.Custom"
+                                        CustomColor="#fff" />
+                        </div>
+                    }
+                    <div class="window_container_header_right_option" action="close" @onclick=Close>
+                        <FluentIcon Value="@(new Icons.Regular.Size20.Dismiss())" Color="Color.Custom" CustomColor="#fff" />
+                    </div>
+                </div>
+            </div>
+            <div class="window_container_body" style="display: @(_programReady ? "flex" : "none")">
+                <MainWindowMenuBar MainMenuBarItems="_mainMenuBarItems" Id="Content.Id" />
+                <CascadingValue Value="UpdateTitle" TValue="Action<string>" Name="@nameof(UpdateTitle)">
+                    <CascadingValue Value="UpdateMainMenuBarItem" TValue="Action<Dictionary<string, List<MenuItem>>>" Name="@nameof(UpdateMainMenuBarItem)">
+                        <CascadingValue Value="OnProgramReady" TValue="Action" Name="@nameof(OnProgramReady)">
+                            @Content.Program.ToRenderFragment()
+                        </CascadingValue>
+                    </CascadingValue>
+                </CascadingValue>
+            </div>
+            @if (!_programReady)
+            {
+                <div class="window_container_body" style="align-items: center; justify-content: center" id="window_container_body_loading">
+                    <FluentProgressRing Width="64px" />
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Process Content { get; set; }
+    Dictionary<string, List<MenuItem>> _mainMenuBarItems = [];
+    private ElementReference _headerReference;
+    private ElementReference _headerLeftReference;
+    private ElementReference _subContainer;
+    private Dimensions _sizeWithoutFullScreen;
+    private Dimensions _positionWithoutFullScreen;
+    private DotNetObjectReference<WindowItemComponent> _objectReference;
+    private IJSObjectReference _resizeObserver;
+    private string _removeListenersFunctionId = string.Empty;
+    private string _title = string.Empty;
+    bool _programReady = false;
+
+    void OnProgramReady()
+    {
+        _programReady = true;
+        StateHasChanged();
+    }
+
+    void UpdateMainMenuBarItem(Dictionary<string, List<MenuItem>> mainMenuBarItems)
+    {
+        this._mainMenuBarItems = mainMenuBarItems;
+    }
+
+    async Task AttachDraggable()
+    {
+        if (!string.IsNullOrWhiteSpace(_removeListenersFunctionId))
+            return;
+
+        _removeListenersFunctionId = await JSRuntime.InvokeAsync<string>("draggableFunctions.startDrag", _container,
+        _headerLeftReference, _objectReference);
+        Logger.LogInformation("result: {0}", _removeListenersFunctionId);
+        Logger.LogInformation(nameof(AttachDraggable));
+    }
+
+    async Task UnattachDraggable()
+    {
+        if (string.IsNullOrWhiteSpace(_removeListenersFunctionId))
+            return;
+
+        await JSRuntime.InvokeVoidAsync("draggableFunctions.removeListeners", _removeListenersFunctionId);
+        _removeListenersFunctionId = string.Empty;
+        Logger.LogInformation(nameof(UnattachDraggable));
+    }
+
+    public void UpdateTitle(string title)
+    {
+        this._title = title;
+        StateHasChanged();
+    }
+
+    #region Callbacks
+
+    protected override void OnInitialized()
+    {
+        _logger = Logger;
+
+        WindowManager.OnFocus += RefreshOnFocus;
+        WindowManager.OnHide += RefreshOnHide;
+        ProgramManager.OnUninstall += OnUninstall;
+        ProgramManager.OnInstall += OnInstall;
+        base.OnInitialized();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            if (Content.Window.Resize)
+            {
+                _objectReference = DotNetObjectReference.Create(this);
+                _resizeObserver = await JSRuntime.InvokeAsync<IJSObjectReference>("resizeObserverInterop.createObserver", _container,
+                _objectReference);
+            }
+            Content.Window.Height = "60vh";
+            Content.Window.Width = "40vw";
+            Content.Window.Left = "0px";
+            Content.Window.Top = "0px";
+            await AttachDraggable();
+            StateHasChanged();
+        }
+    }
+
+    public override void Dispose()
+    {
+        WindowManager.OnFocus -= RefreshOnFocus;
+        WindowManager.OnHide -= RefreshOnHide;
+        ProgramManager.OnUninstall -= OnUninstall;
+        ProgramManager.OnInstall -= OnInstall;
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        if (_resizeObserver != null)
+        {
+            await _resizeObserver.InvokeVoidAsync("disconnect");
+            await _resizeObserver.DisposeAsync();
+        }
+
+        if (_objectReference != null)
+        {
+            await JSRuntime.InvokeVoidAsync("draggableFunctions.removeListeners", _removeListenersFunctionId);
+            _objectReference.Dispose();
+        }
+    }
+
+    async Task OnUninstall(Program program)
+    {
+        if (program == Content.Program)
+            await Close();
+    }
+
+    async Task OnInstall(Program program)
+    {
+        if (program == Content.Program)
+            await Close();
+    }
+    #endregion
+
+    #region Window functions
+
+    async Task RefreshOnFocus(Window window)
+    {
+        if (window != Content.Window)
+            return;
+
+        if (window.WasHided)
+        {
+            window.Width = Content.Window.WidthOnBeforeHide;
+            window.Height = Content.Window.HeightOnBeforeHide;
+            window.Left = Content.Window.LeftOnBeforeHide;
+            window.Top = Content.Window.TopOnBeforeHide;
+            Content.Window.WasHided = false;
+            _functionsToRunOnAfterRenderAsync.Add(AttachDraggable);
+        }
+
+        await base.refreshAsync();
+    }
+
+    async Task RefreshOnHide(Window window)
+    {
+        if (window != Content.Window)
+            return;
+
+        Content.Window.WidthOnBeforeHide = window.Width;
+        Content.Window.HeightOnBeforeHide = window.Height;
+        Content.Window.LeftOnBeforeHide = window.Left;
+        Content.Window.TopOnBeforeHide = window.Top;
+        Content.Window.WasHided = true;
+        _functionsToRunOnAfterRenderAsync.Add(UnattachDraggable);
+        await base.refreshAsync();
+    }
+
+    async Task RefreshAsync(Window window)
+    {
+        if (window != Content.Window)
+            return;
+
+        await base.refreshAsync();
+    }
+
+    async Task FullScreen()
+    {
+        var size = await JSRuntime.InvokeAsync<Dimensions>("getDimensions", _container);
+        var position = await JSRuntime.InvokeAsync<Dimensions>("getPosition", _container);
+        _sizeWithoutFullScreen = new(size.X, size.Y);
+        _positionWithoutFullScreen = new(position.X, position.Y);
+        Content.Window.Height = "100%";
+        Content.Window.Width = "100%";
+        Content.Window.Top = "0px";
+        Content.Window.Left = "0px";
+        Content.Window.FullScreen = true;
+        await UnattachDraggable();
+    }
+
+    async Task CloseFullScreen()
+    {
+        Content.Window.Width = (int)_sizeWithoutFullScreen.X + "px";
+        Content.Window.Height = (int)_sizeWithoutFullScreen.Y + "px";
+        Content.Window.Left = (int)_positionWithoutFullScreen.X + "px";
+        Content.Window.Top = (int)_positionWithoutFullScreen.Y + "px";
+        Content.Window.FullScreen = false;
+        await AttachDraggable();
+    }
+
+    async Task Hide()
+    {
+        await WindowManager.HideAsync(this.Content.Window);
+        StateHasChanged();
+    }
+
+    async Task Close()
+    {
+        await ProcessManager.EndAsync(this.Content);
+    }
+
+    [JSInvokable]
+    public async Task OnClickWindowContainer()
+    {
+        if (Content.Window.Focused)
+            return;
+        await Focus();
+    }
+
+    async Task Focus()
+    {
+        if (this.Content.Window.Focused)
+            return;
+        await WindowManager.FocusAsync(this.Content.Window);
+    }
+
+    [JSInvokable]
+    public void OnResize(string widthInPx, string heightInPx)
+    {
+        Logger.LogInformation("Redimensionando...");
+        (Content.Window.Width, Content.Window.Height) = (widthInPx, heightInPx);
+    }
+
+    [JSInvokable]
+    public void OnDrag(string left, string top)
+    {
+        Logger.LogInformation("Arrastando...");
+        (Content.Window.Left, Content.Window.Top) = (left, top);
+    }
+    #endregion
+}

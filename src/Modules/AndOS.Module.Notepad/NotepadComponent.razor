@@ -1,0 +1,100 @@
+﻿@using AndOS.Core.Enums
+@using AndOS.Shared.Requests.Files.Create
+@inject ILogger<NotepadComponent> Logger
+@inject ICloudStorageServiceFactory CloudStorageServiceFactory
+@inject IFileExplorerDialogs FileExplorerDialogs
+@inherits BaseProgramComponent
+@namespace AndOS.Module.Notepad
+
+@{
+    base.BuildRenderTree(__builder);
+}
+
+<textarea @bind="text" style="
+            resize: none;
+            width: 100%;
+            height: 100%;
+            border: 0px;
+            text-wrap: @(LineBreak ? "wrap" : "nowrap")"></textarea>
+
+@code {
+    [Parameter] public FileDTO Content { get; set; } = new() { };
+    public CloudStorage CurrentCloudStorage { get; set; }
+    public bool LineBreak { get; set; }
+
+    private string text = "";
+
+    public NotepadComponent()
+    {
+        Name = "Notepad";
+        AllowMultipleInstances = true;
+        Icon = builder =>
+        {
+            builder.OpenComponent<BlazorBootstrap.Icon>(0);
+            builder.AddAttribute(1, "Name", BlazorBootstrap.IconName.JournalText); // Substitua pelo ícone desejado
+            builder.AddAttribute(2, "style", "width: inherit; font-size: inherit;");
+            builder.CloseComponent();
+        };
+    }
+
+    protected override void OnInitialized()
+    {
+        _logger = Logger;
+        #region Setup main menu bar items
+        #region File
+        MenuItem open = new("Open", async () => await OpenAsync());
+        MenuItem save = new("Save", SaveAsync, null, () => Task.FromResult(Content.Id == Guid.Empty));
+        MenuItem saveAs = new("Save As", SaveAsAsync);
+        MainMenuBarItems.Add("File", [open, save, saveAs]);
+        #endregion
+
+        #region Edit
+        MenuItem lineBreak = new("Line break", ToggleLineBreak, () => Task.FromResult(LineBreak));
+        MainMenuBarItems.Add("Edit", [lineBreak]);
+        #endregion
+        #endregion
+        base.OnInitialized();
+    }
+
+    async Task SaveAsync()
+    {
+        await FileService.SaveAsync(Content, CurrentCloudStorage, text);
+    }
+
+    async Task SaveAsAsync()
+    {
+        await FileExplorerDialogs.SaveAsAsync(Content, text);
+    }
+
+    async Task OpenAsync()
+    {
+        var file = await FileExplorerDialogs.SelectFileAsync();
+        if (file is null)
+            return;
+
+        var response = await FileService.GetByIdAsync(new(file.Id));
+        this.CurrentCloudStorage = response.CloudStorage;
+        Content = response;
+        Logger.LogInformation("File:\n{0}", Content.ToString());
+        try
+        {
+            var service = CloudStorageServiceFactory.Create(response.CloudStorage);
+            text = await service.DownloadAsync(response.Url);
+            UpdateTitle($"{Name} - {file.Name}");
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, null);
+            ToastService.ShowError(ex.Message);
+        }
+    }
+
+    Task ToggleLineBreak()
+    {
+        Logger.LogInformation("Click on {0}", nameof(ToggleLineBreak));
+        LineBreak = !LineBreak;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+}

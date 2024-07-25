@@ -1,0 +1,24 @@
+﻿@namespace AndOS.Web.Components.TopBar
+
+<div class="task_bar_clock">
+    <span>@currentTime.ToString("HH:mm:ss")</span>
+    <span>@currentTime.ToString("dd/MM/yyyy")</span>
+</div>
+@code {
+    private DateTime currentTime;
+    private async Task UpdateClock()
+    {
+        while (true)
+        {
+            await Task.Delay(1000); // Aguarda 1 segundo
+            currentTime = DateTime.Now;
+            StateHasChanged(); // Renderiza novamente o componente
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await UpdateClock(); // Inicia a atualização do relógio
+    }
+}

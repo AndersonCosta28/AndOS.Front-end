@@ -1,0 +1,22 @@
+﻿.window-taskbar-component {
+  height: 50px;
+  width: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer; /* Muda o cursor para indicar que é clicável */
+  transition: transform 0.2s ease-in-out; /* Adiciona uma transição suave ao passar o mouse */
+  background-color: #f0f0f0; /* Fundo claro */
+}
+
+.window-taskbar-component:hover {
+  transform: scale(1.1); /* Aumenta o tamanho do ícone ao passar o mouse */
+}
+
+.window-taskbar-component-focus-indicator {
+  width: 5px;
+  height: 5px;
+  background-color: #0078d4; /* Cor azul do tema Fluent UI para indicador de foco */
+  border-radius: 20px;
+}

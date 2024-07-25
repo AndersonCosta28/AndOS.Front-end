@@ -1,0 +1,28 @@
+﻿@using AndOS.Module.FileExplorer.Enums
+@using AndOS.Module.FileExplorer.Components.File
+@inherits DialogSelectFileExplorerBase<SelectedFile>
+@inject ILogger<DialogSelectFile> Logger
+@namespace AndOS.Module.FileExplorer.Dialogs.Select.Files
+@inject IFileService FileService
+@{
+    base.BuildRenderTree(__builder);
+}
+
+@code {
+    public DialogSelectFile()
+    {
+        config = new() { FilesAccepts = "txt", ItemToSelect = ItemTypeForSelection.File, Mode = ModeFileExplorer.SelectOne };
+    }
+
+    protected override async Task Confirm()
+    {
+        var selectedFile = ((FileItemComponent)config.ItemsSelect.FirstOrDefault())?.Content;
+        if (selectedFile == null)
+        {
+            await Dialog.CloseAsync(null);
+            return;
+        }
+        var file = new  SelectedFile(selectedFile.Id, selectedFile.Name);
+        await Dialog.CloseAsync(file);
+    }
+}

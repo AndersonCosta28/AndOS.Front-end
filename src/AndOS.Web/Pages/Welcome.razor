@@ -1,0 +1,18 @@
+﻿@page "/Welcome"
+@using AndOS.Domain.Consts
+@using AndOS.Web.Layout
+@layout DefaultLayout
+@inject NavigationManager NavigationManager
+@namespace AndOS.Web.Pages.Welcome
+
+<div class="welcome-page">
+    <h2>Welcome</h2>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        NavigationManager.NavigateTo(Routes.Home);
+    }
+}

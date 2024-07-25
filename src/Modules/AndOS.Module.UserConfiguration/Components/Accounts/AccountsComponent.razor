@@ -1,0 +1,98 @@
+﻿@using AndOS.Application.Components
+@using AndOS.Core.Extensions
+@using AndOS.Module.UserConfiguration.Components.Accounts.Dialogs
+@inject HttpClient Http
+@inject NavigationManager NavManager
+@inject ILogger<AccountsComponent> Logger
+@inherits AndOSBaseComponent
+@namespace AndOS.Module.UserConfiguration.Components.Accounts
+
+<FluentButton OnClick="create">
+    <BlazorBootstrap.Icon Name="BlazorBootstrap.IconName.PlusCircle" />
+</FluentButton>
+<FluentButton OnClick="refreshGrid">
+    <BlazorBootstrap.Icon Name="BlazorBootstrap.IconName.ArrowCounterclockwise" />
+</FluentButton>
+
+<div style="height: 434px; overflow:auto;" tabindex="-1">
+    <FluentDataGrid @ref="grid" ItemsProvider="accountsProvider" Virtualize="true" ItemSize="46" Loading="_loading"
+        GenerateHeader="GenerateHeaderOption.Sticky" TGridItem="AccountDTO">
+        <PropertyColumn Title="Name" Property="@(c => c!.Name)" />
+        <PropertyColumn Title="Plataform" Property="@(c => c!.CloudStorage.GetDescription())" />
+        <TemplateColumn Title="Actions" Align="@Align.End">
+            <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
+                OnClick="@(async () => await edit(context))" />
+            <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
+                OnClick="@(async () => await delete(context))" />
+        </TemplateColumn>
+    </FluentDataGrid>
+</div>
+
+@code {
+    FluentDataGrid<AccountDTO> grid;
+    GridItemsProvider<AccountDTO> accountsProvider = default!;
+    bool _loading = true;
+    protected override void OnInitialized()
+    {
+        _logger = Logger;
+        AccountService.OnAccountCreated += refreshGrid;
+        AccountService.OnAccountUpdated += refreshGrid;
+        AccountService.OnAccountDeleted += refreshGrid;
+        base.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        accountsProvider = async req =>
+        {
+            var response = await AccountService.GetAllAsync(new(), req.CancellationToken);
+
+            return GridItemsProviderResult.From(items: response, totalItemCount: response.Count);
+        };
+    }
+
+    public override void Dispose()
+    {
+        AccountService.OnAccountCreated -= refreshGrid;
+        AccountService.OnAccountUpdated -= refreshGrid;
+        AccountService.OnAccountDeleted -= refreshGrid;
+    }
+
+    async Task refreshGrid()
+    {
+        _logger.LogInformation("{0} called", nameof(refreshGrid));
+        _loading = true;
+        await grid!.RefreshDataAsync();
+        _loading = false;
+    }
+
+    async Task create()
+    {
+        var dialog = await DialogService.ShowDialogAsync<DialogCreate>(new()
+            {
+                Width = "70vw",
+                Height = "70vh",
+            });
+
+        await refreshGrid();
+    }
+
+    async Task edit(AccountDTO account)
+    {
+        var dialog = await DialogService.ShowDialogAsync<DialogUpdate>(account, new()
+            {
+                Width = "70vw",
+                Height = "70vh",                
+            });
+    }
+
+    async Task delete(AccountDTO account)
+    {
+        var dialog = await DialogService.ShowDialogAsync<DialogDelete>(account, new()
+            {
+                Width = "400px",
+                Height = "250px",
+            });
+    }
+}

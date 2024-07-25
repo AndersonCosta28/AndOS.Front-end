@@ -1,0 +1,19 @@
+﻿@inject IUserInfo UserInfo
+
+<FluentStack Orientation="Orientation.Vertical"
+             HorizontalGap="10" HorizontalAlignment="HorizontalAlignment.Center" VerticalGap="10" VerticalAlignment="VerticalAlignment.Center">
+    <FluentTextField Label="Username" ReadOnly Value=@userName />
+    <FluentTextField Label="Email" ReadOnly Value=@userEmail />
+</FluentStack>
+@code {
+    private string userName = "";
+    private string userEmail = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        userName = await UserInfo.GetUserNameAsync();
+        userEmail = await UserInfo.GetEmailAsync();
+    }
+}

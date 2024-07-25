@@ -1,0 +1,41 @@
+﻿@using AndOS.Application.Components
+@using AndOS.Application.Components.Windows
+
+@inherits AndOSBaseComponent
+@namespace AndOS.Web.Components.TaskBar
+@inject ILogger<TaskBarComponent> Logger
+
+@if (WindowManager.Windows.Count > 0)
+{
+    <div id=@IdElement>
+        <div id="taskbar_container_content">
+            @foreach (var process in ProcessManager.Processes.Where(x => x.Window is not null))
+            {
+                <WindowTaskBarComponent Process="process" @key=process />
+            }
+        </div>
+    </div>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        _logger = Logger;
+        IdElement = "taskbar_container";
+
+        WindowManager.OnOpen += refreshAsync;
+        WindowManager.OnClose += refreshAsync;
+        WindowManager.OnFocus += refreshAsync;
+        WindowManager.OnHide += refreshAsync;
+        base.OnInitialized();
+    }
+
+    public override void Dispose()
+    {
+        WindowManager.OnOpen -= refreshAsync;
+        WindowManager.OnClose -= refreshAsync;
+        WindowManager.OnFocus -= refreshAsync;
+        WindowManager.OnHide -= refreshAsync;
+        base.Dispose();
+    }
+}

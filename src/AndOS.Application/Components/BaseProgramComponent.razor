@@ -1,0 +1,28 @@
+﻿@inherits Program
+@inject ILogger<BaseProgramComponent> Logger
+@namespace AndOS.Application.Components.Programs
+
+
+@code {
+    [CascadingParameter(Name = nameof(UpdateTitle))] public Action<string> UpdateTitle { get; set; }
+    [CascadingParameter(Name = nameof(UpdateMainMenuBarItem))] public Action<Dictionary<string, List<MenuItem>>> UpdateMainMenuBarItem { get; set; }
+    [CascadingParameter(Name = nameof(OnProgramReady))] public Action OnProgramReady { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _logger ??= Logger;
+        if (UpdateTitle is not null)
+            UpdateTitle(Name);
+        if (UpdateMainMenuBarItem is not null)
+            UpdateMainMenuBarItem(this.MainMenuBarItems ?? []);
+        base.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (OnProgramReady is not null)
+            OnProgramReady();
+
+        await base.OnInitializedAsync();
+    }
+}

@@ -1,0 +1,12 @@
+﻿@using AndOS.Domain.Consts
+@using AndOS.Infrastructure.Authentication
+@using AndOS.Web.Layout
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject NavigationManager Navigation
+@layout AuthLayout
+@code {
+    protected override void OnInitialized()
+    {
+        Navigation.NavigateToLogin(Routes.Login);
+    }
+}

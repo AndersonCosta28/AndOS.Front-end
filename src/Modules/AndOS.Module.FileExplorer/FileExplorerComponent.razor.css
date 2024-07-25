@@ -1,0 +1,24 @@
+.search-bar {
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between
+}
+
+.search-bar input {
+  width: 85%;
+  padding: 5px;
+  border: none;
+  outline: none;
+}
+
+.folder_list_container {
+    display: flex;
+    flex-wrap: wrap;
+    overflow: auto;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-content: flex-start;
+    height: 90%;
+}

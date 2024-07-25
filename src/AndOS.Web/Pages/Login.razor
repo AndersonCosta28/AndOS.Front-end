@@ -1,0 +1,55 @@
+﻿@page "/authentication/login"
+@using AndOS.Infrastructure.Api
+@using AndOS.Infrastructure.Authentication
+@namespace AndOS.Web.Pages.Login
+@inject AuthenticationService AuthServices
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+@inject ILogger<Login> Logger
+<div class="login-page">
+    <div class="login-form">
+        <h3>Login</h3>
+        <EditForm Model="@loginModel" OnValidSubmit="@HandleValidSubmit">
+            <FluentTextField @bind-Value="loginModel.Email" Label="Email" Placeholder="Digite seu email" Style="width: 100%; margin-bottom: 10px;" TextFieldType="TextFieldType.Email" />
+            <FluentTextField @bind-Value="loginModel.Password" Label="Senha" Placeholder="Digite sua senha" Style="width: 100%; margin-bottom: 10px;" TextFieldType="TextFieldType.Password" />
+            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" OnClick="HandleValidSubmit" Style="width: 100%; background-color: #0078d4; color: #ffffff;" Loading=loading>Login</FluentButton>
+        </EditForm>
+        <p>
+            Don't have an account? <span @onclick=GoToRegister class="hiperlink">Register</span>
+        </p>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+    private bool loading = false;
+
+    private void GoToRegister()
+    {
+        NavigationManager.NavigateTo("/authentication/register");
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            loading = true;
+            await AuthServices.Login(loginModel.Email, loginModel.Password);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, e.Message);
+            ToastService.ShowError(e.Message);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    public class LoginModel
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+    }
+}

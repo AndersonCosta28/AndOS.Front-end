@@ -1,0 +1,8 @@
+﻿.top_bar_clock {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--topbar-clock-color);
+    height: 100%;
+}

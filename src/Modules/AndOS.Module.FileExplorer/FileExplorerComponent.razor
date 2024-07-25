@@ -1,0 +1,240 @@
+﻿
+@using AndOS.Module.FileExplorer.Enums
+@using AndOS.Module.FileExplorer.Params.OpenFolder
+@using AndOS.Module.FileExplorer.Components.Folder
+@using AndOS.Module.FileExplorer.Components.Folder.Dialogs.Create
+@using AndOS.Module.FileExplorer.Components.File
+@inherits BaseProgramComponent
+@inject ILogger<FileExplorerComponent> Logger
+
+@namespace AndOS.Module.FileExplorer
+
+<FluentOverlay @bind-Visible=@overlayVisible Opacity="0.4" Alignment="Align.Center"
+               Justification="JustifyContent.Center">
+    <FluentProgressRing />
+</FluentOverlay>
+<div id="@IdElement" style="height: 100%">
+
+    <div class="search-bar">
+        <div>
+            <FluentIcon Value="@(new Icons.Regular.Size28.ArrowCircleLeft())" OnClick=GoBack
+                        Color="navigationHistory.Count > 0 ? Color.Neutral : Color.Disabled" />
+            <FluentIcon Value="@(new Icons.Regular.Size28.ArrowCircleRight())" OnClick=GoForward
+                        Color="forwardHistory.Count > 0 ? Color.Neutral : Color.Disabled" />
+        </div>
+        <input type="text" @bind="Content" @onkeydown="HandleKeyDown"
+               @onblur="UpdatePath" @ref="searchInput" />
+    </div>
+    <div class="folder_list_container" @oncontextmenu=ShowMenuItemsAsync
+         style="display: flex;flex-wrap: wrap;overflow: auto;flex-direction: row;justify-content: flex-start;align-content: flex-start; height: 90%;">
+        <CascadingValue TValue="FileExplorerConfig" Value="Config">
+            @foreach (var folder in ContentFolder?.Folders ?? [])
+            {
+                <FolderItemComponent Content=@folder @key=folder OnOpen="LoadFolders" />
+            }
+            @foreach (var folder in ContentFolder?.Files ?? [])
+            {
+                <FileItemComponent Content="folder" />
+            }
+        </CascadingValue>
+    </div>
+</div>
+
+@code {
+    public FileExplorerComponent()
+    {
+        Name = "File explorer";
+        AllowMultipleInstances = true;
+        Icon = builder =>
+        {
+            builder.OpenComponent<FluentIcon<Icons.Regular.Size20.FolderSearch>>(0);
+            builder.AddAttribute(1, "Value", new Icons.Regular.Size20.FolderSearch()); // Substitua pelo ícone desejado
+            builder.AddAttribute(2, "style", "width: inherit; font-size: inherit;");
+            builder.AddAttribute(3, "Color", Color.Custom);
+            builder.AddAttribute(4, "CustomColor", "#333");             
+            builder.CloseComponent();
+        };
+    }
+
+    [Parameter] public string Content { get; set; } = string.Empty;
+    [Parameter]
+    public FileExplorerConfig Config { get; set; } = new()
+        {
+            FilesAccepts = "*",
+            ItemsSelect = [],
+            ItemToSelect = ItemTypeForSelection.Both,
+            Mode = ModeFileExplorer.SelectOne,
+        };
+    public FolderDTO ContentFolder { get; set; }
+
+    private bool overlayVisible;
+    private ElementReference searchInput;
+    private Stack<string> navigationHistory = [];
+    private Stack<string> forwardHistory = [];
+
+    #region Navigation
+    async Task GoBack()
+    {
+        if (navigationHistory.Count > 0)
+        {
+            var previousPath = navigationHistory.Pop();
+            await LoadFolders(new OpenFolderByPath(previousPath, NavigationType.Back));
+        }
+    }
+
+    async Task GoForward()
+    {
+        if (forwardHistory.Count > 0)
+        {
+            var nextPath = forwardHistory.Pop();
+            await LoadFolders(new OpenFolderByPath(nextPath, NavigationType.Forward));
+        }
+    }
+
+    bool canInsertHistory(Stack<string> history, string value)
+    {
+        var hasPeek = history.TryPeek(out var peek);
+        return !hasPeek || (hasPeek && peek != value);
+    }
+
+    void HandleNavigation(IOpenFolderParams param, string oldPath)
+    {
+
+        if (param.NavigationType == NavigationType.Back && canInsertHistory(forwardHistory, oldPath))
+            forwardHistory.Push(oldPath);
+
+        if (param.NavigationType is NavigationType.Default or NavigationType.Forward && canInsertHistory(navigationHistory,
+        oldPath))
+            navigationHistory.Push(oldPath);
+
+        if (param.ClearFowardHistory)
+            forwardHistory.Clear();
+
+        if (param.ClearNavigationHistory)
+            navigationHistory.Clear();
+    }
+    #endregion
+
+    #region Life-cycle functions
+    protected override void OnInitialized()
+    {
+        Logger.LogInformation("Value of {0} is {1}", nameof(Content), Content);
+        IdElement = $"system-file-{Guid.NewGuid()}";
+        MenuItem menuItemNewFolder = new("New folder", NewFolderAsync, callBackDisabled: () => Task.FromResult(!ContentFolder.Permissions.Contains(Core.Enums.FolderPermission.Read)));
+        MenuItem menuItemRefresh = new("Refresh", refreshAsync);
+        _menuItems.AddRange([menuItemNewFolder, menuItemRefresh]);
+        FolderService.OnFolderCreated += refreshAsync;
+        FolderService.OnFolderUpdated += refreshAsync;
+        FolderService.OnFolderDeleted += refreshAsync;
+        FileService.OnFileCreated += refreshAsync;
+        FileService.OnFileUpdated += refreshAsync;
+        FileService.OnFileDeleted += refreshAsync;
+        base.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFolders(new OpenFolderByPath(Content, NavigationType.Default, true, true));
+        await base.refreshAsync();
+        await base.OnInitializedAsync();
+    }
+    #endregion
+
+    protected override async Task refreshAsync()
+    {
+        await LoadFolders(new OpenFolderById(ContentFolder.Id, NavigationType.Default, false, false));
+        await base.refreshAsync();
+    }
+
+    async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            // Desfoca o campo de entrada
+            await JSRuntime.InvokeVoidAsync("blurElement", searchInput);
+        }
+    }
+
+    async Task UpdatePath()
+    {
+        Logger.LogInformation("Perfom {0}", nameof(UpdatePath));
+        if (Content is { Length: 0 })
+            Content = "";
+        await LoadFolders(new OpenFolderByPath(Content, NavigationType.Default, false, true));
+    }
+
+    async Task LoadFolders(IOpenFolderParams param)
+    {
+        if (param is OpenFolderById openByIdParam)
+            await OpenFolder(openByIdParam);
+        else if (param is OpenFolderByPath openByPathParam)
+            await OpenFolder(openByPathParam);
+    }
+
+    async Task OpenFolder(OpenFolderByPath param)
+    {
+        try
+        {
+            string oldPath = Content;
+            Logger.LogInformation("Value of {0}: {1}", nameof(oldPath), oldPath);
+            overlayVisible = true;
+            ContentFolder = await FolderService.GetByPathAsync(new(param.Path));
+            Content = ContentFolder.FullPath;
+            Logger.LogInformation("Value of {0}: {1}", nameof(oldPath), oldPath);
+            HandleNavigation(param, oldPath);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(null, e);
+            ToastService.ShowError(e.Message);
+        }
+        finally
+        {
+            overlayVisible = false;
+        }
+    }
+
+    async Task OpenFolder(OpenFolderById param)
+    {
+        try
+        {
+            string oldPath = Content;
+            Logger.LogInformation("Value of {0}: {1}", nameof(oldPath), oldPath);
+
+            overlayVisible = true;
+            ContentFolder = await FolderService.GetByIdAsync(new(param.Id));
+            Content = ContentFolder.FullPath;
+            Logger.LogInformation("Value of {0}: {1}", nameof(oldPath), oldPath);
+
+            HandleNavigation(param, oldPath);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(null, e);
+            ToastService.ShowError(e.Message);
+        }
+        finally
+        {
+            overlayVisible = false;
+        }
+    }
+
+    async Task NewFolderAsync()
+    {
+        Logger.LogInformation("{0}.{1} executed", nameof(FileExplorerComponent), nameof(NewFolderAsync));
+        var createParams = new CreateFolderParameters() { ParentFolder = ContentFolder };
+        var dialogParams = new DialogParameters() { Width = "300px" };
+        await DialogService.ShowDialogAsync<DialogCreateFolder>(createParams, dialogParams);
+    }
+
+    public override void Dispose()
+    {
+        FolderService.OnFolderCreated -= refreshAsync;
+        FolderService.OnFolderUpdated -= refreshAsync;
+        FolderService.OnFolderDeleted -= refreshAsync;
+        FileService.OnFileCreated -= refreshAsync;
+        FileService.OnFileUpdated -= refreshAsync;
+        FileService.OnFileDeleted -= refreshAsync;
+        base.Dispose();
+    }
+}

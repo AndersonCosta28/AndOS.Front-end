@@ -1,0 +1,58 @@
+﻿@using AndOS.Core.Schemas
+@using AndOS.Shared.Requests.Folders.Create
+@using Microsoft.AspNetCore.Components.Web
+@inject ILogger<DialogCreateFolder> Logger
+@inject IDialogService IDialogService
+@inject IToastService ToastService
+@inject IFolderService FolderService
+@implements IDialogContentComponent<CreateFolderParameters>
+@namespace AndOS.Module.FileExplorer.Components.Folder.Dialogs.Create
+
+<FluentStack Orientation="Orientation.Vertical">
+    <FluentDialogHeader>
+        <FluentLabel Typo="Typography.H2">Create Folder</FluentLabel>
+    </FluentDialogHeader>
+    <FluentDialogBody>
+        <FluentTextField @bind-Value=folderName Name="Name" Label="Folder name" Pattern="@FolderSchema.RegexName" Minlength="@FolderSchema.MinLenghtName" Maxlength="@FolderSchema.MaxLenghtName" />
+    </FluentDialogBody>
+    <FluentDialogFooter>
+        <FluentStack VerticalAlignment="VerticalAlignment.Center" HorizontalAlignment="HorizontalAlignment.Center">
+            <FluentButton Loading=loading Type="ButtonType.Submit" Appearance="Appearance.Accent" OnClick=Submit>Save
+            </FluentButton>
+        </FluentStack>
+    </FluentDialogFooter>
+</FluentStack>
+
+@code {
+    [Parameter] public CreateFolderParameters Content { get; set; } = default!;
+    [CascadingParameter] public FluentDialog Dialog { get; set; }
+
+    string folderName = string.Empty;
+    bool loading = false;
+
+    protected override void OnInitialized()
+    {
+        Logger.Log(LogLevel.Information, "Abrindo ModalCreate");
+        Logger.Log(LogLevel.Information, "Valor de {0}: {1}", nameof(Content.ParentFolder.Id), Content.ParentFolder.Id);
+    }
+
+    async Task Submit()
+    {
+        try
+        {
+            loading = true;
+            CreateFolderRequest request = new(folderName.Trim(), Content.ParentFolder.Id);
+            await FolderService.CreateAsync(request);
+            await Dialog.CloseAsync();
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, null);
+            ToastService.ShowError("Error create folder:\n" + e.Message);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

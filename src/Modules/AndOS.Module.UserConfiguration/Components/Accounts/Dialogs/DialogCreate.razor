@@ -1,0 +1,101 @@
+﻿@using AndOS.Core.Enums
+@using AndOS.Core.Schemas
+@using AndOS.Core.StorageConfigs
+@using AndOS.Shared.Requests.Accounts.Create
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.FluentUI.AspNetCore.Components.Extensions
+@using AndOS.Module.UserConfiguration.Components.Accounts.Dialogs.Partials
+@using System.Text.Json
+@inject ILogger<DialogCreate> Logger
+@inject IDialogService IDialogService
+@inject IToastService ToastService
+@inject IAccountService AccountService
+@implements IDialogContentComponent<AccountDTO>
+@namespace AndOS.Module.UserConfiguration.Components.Accounts.Dialogs
+
+<FluentDialogHeader>
+    <FluentLabel Typo="Typography.H2">Create Account</FluentLabel>
+</FluentDialogHeader>
+
+<FluentDialogBody Style="overflow: auto; padding: 50px;">
+    <FluentStack Orientation="Orientation.Horizontal">
+
+        <FluentTextField @bind-Value=Content.Name Name="Label" Label="Label" Pattern="@AccountSchema.RegexName"
+                         Minlength="@AccountSchema.MinLenghtName" Maxlength="@AccountSchema.MaxLenghtName" Style="width: 50%" />
+        <FluentSelect Label="Cloud service" TOption=CloudStorage Items="@(Enum.GetValues<CloudStorage>())"
+                      OptionText="@(v => v.GetDescription(false))" OptionValue="@(v => ((byte)v).ToString())"
+                      @bind-SelectedOption=@Content.CloudStorage />
+    </FluentStack>
+    <FluentDivider />
+    <br />
+    <br />
+    @if (Content.CloudStorage == CloudStorage.Azure_BlobStorage)
+    {
+        <AzureBlobStoragePartialComponent Content="azureConfig" />
+    }
+    else if (Content.CloudStorage == CloudStorage.GCP_CloudStorage)
+    {
+        <GcpStorageCloudPartialComponent Content="gcpStorageConfig" />
+    }
+    else
+    {
+        <AwsS3PartialComponent Content="awsS3Config" />
+    }
+</FluentDialogBody>
+
+<FluentDialogFooter>
+    <FluentStack VerticalAlignment="VerticalAlignment.Center" HorizontalAlignment="HorizontalAlignment.Center">
+        <FluentButton Loading=_loading Type="ButtonType.Submit" Appearance="Appearance.Accent" OnClick=Submit>
+            Save
+        </FluentButton>
+    </FluentStack>
+</FluentDialogFooter>
+
+@code {
+    [Parameter] public AccountDTO Content { get; set; } = new();
+    [CascadingParameter] public FluentDialog Dialog { get; set; } = default!;
+    AzureBlobStorageConfig azureConfig { get; set; } = new();
+    AwsS3Config awsS3Config { get; set; } = new();
+    GcpStorageConfig gcpStorageConfig { get; set; } = new();
+    bool _loading { get; set; } = false;
+
+    async Task Submit()
+    {
+        try
+        {
+            _loading = true;
+
+            CreateAccountRequest request = new()
+                {
+                    Name = Content.Name,
+                    CloudStorage = Content.CloudStorage,
+                    Config = GetJsonDocument(),
+                };
+            await AccountService.CreateAsync(request);
+            await Dialog.CloseAsync();
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, null);
+            ToastService.ShowError("Error create Account:\n" + e.Message);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    JsonDocument GetJsonDocument()
+    {
+        var jsonString = Content.CloudStorage switch
+        {
+            CloudStorage.Azure_BlobStorage => JsonSerializer.Serialize(azureConfig),
+            CloudStorage.AWS_S3Storage => JsonSerializer.Serialize(awsS3Config),
+            CloudStorage.GCP_CloudStorage => JsonSerializer.Serialize(gcpStorageConfig),
+            _ => JsonSerializer.Serialize(new { })
+        };
+
+        var jsonDocument = JsonDocument.Parse(jsonString);
+        return jsonDocument;
+    }
+}

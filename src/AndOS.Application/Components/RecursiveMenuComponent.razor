@@ -1,0 +1,42 @@
+﻿@inject ILogger<RecursiveMenuComponent> Logger
+@namespace AndOS.Application.Components
+@using AndOS.Application.Entities
+
+@if (RootMenuItem.OnClick != null)
+{
+    if (RootMenuItem.Visible)
+    {
+        <FluentMenuItem Label="@RootMenuItem.Label" OnClick="EventClick" Checked=@RootMenuItem.Checked Disabled=@RootMenuItem.Disable />
+    }
+}
+else
+{
+    <FluentMenuItem Label="@RootMenuItem.Label">
+        <MenuItems>
+            @foreach (var menuItem in RootMenuItem.SubMenuItems)
+            {
+                <RecursiveMenuComponent @key=menuItem RootMenuItem="menuItem" />
+            }
+        </MenuItems>
+    </FluentMenuItem>
+}
+
+@code {
+    [Parameter] public MenuItem RootMenuItem { get; set; }
+    public bool Clicked { get; set; }
+    protected override bool ShouldRender()
+    {
+        if (Clicked)
+        {
+            Clicked = false;
+            return Clicked;
+        }
+        return base.ShouldRender();
+    }
+
+    async Task EventClick()
+    {
+        Clicked = true;
+        await RootMenuItem.OnClick();
+    }
+}

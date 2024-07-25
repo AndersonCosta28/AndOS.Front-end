@@ -1,0 +1,33 @@
+﻿@using AndOS.Web.Components.TaskBar
+@using AndOS.Web.Components.TopBar
+@using Microsoft.AspNetCore.Components
+@using System.Reflection
+@inherits LayoutComponentBase
+@inject IContextMenuManager ContextMenuManager
+
+<div id="main_layout_container">
+    <TopBarComponent></TopBarComponent>
+    @Body
+    <TaskBarComponent></TaskBarComponent>
+    <FluentToastProvider MaxToastCount="10" />
+    <FluentDialogProvider />
+    <FluentMenu Style="position: fixed" @bind-Open="ContextMenuManager.Open" @ref=fluentMenuRef Trigger="MouseButton.Right" Anchored="false">
+        @foreach (var item in ContextMenuManager.GetItems())
+        {
+            <AndOS.Application.Components.RecursiveMenuComponent RootMenuItem="item" />
+        }
+    </FluentMenu>
+</div>
+
+@code {
+    FluentMenu fluentMenuRef;
+    async Task Refresh(MouseEventArgs e)
+    {
+        await fluentMenuRef.OpenAsync((int)e.ClientX, (int)e.ClientY);
+    }
+
+    protected override void OnInitialized()
+    {
+        ContextMenuManager.OnSetItems += Refresh;
+    }
+}

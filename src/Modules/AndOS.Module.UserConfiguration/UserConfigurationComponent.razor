@@ -1,0 +1,44 @@
+﻿@inherits BaseProgramComponent
+@namespace AndOS.Module.UserConfiguration
+@{
+    base.BuildRenderTree(__builder);
+}
+
+<FluentTabs OnTabChange="HandleOnTabChange" ActiveTabId="general">
+    <FluentTab Label="General" Id="general">
+        <AndOS.Module.UserConfiguration.Components.General.GeneralComponent />
+    </FluentTab>
+    <FluentTab Label="Security" Id="security">
+        <AndOS.Module.UserConfiguration.Components.Security.SecutiryComponent />
+    </FluentTab>
+    <FluentTab Label="Accounts" Id="accounts">
+        <AndOS.Module.UserConfiguration.Components.Accounts.AccountsComponent />
+    </FluentTab>
+</FluentTabs>
+
+@code {
+    FluentTab changedto;
+
+    private void HandleOnTabChange(FluentTab tab)
+    {
+        changedto = tab;
+    }
+
+    public UserConfigurationComponent() : base()
+    {
+        Name = "User configuration";
+        AllowMultipleInstances = false;
+        Icon = builder =>
+        {
+            builder.OpenComponent<BlazorBootstrap.Icon>(0);
+            builder.AddAttribute(1, "Name", BlazorBootstrap.IconName.PersonFillGear); // Substitua pelo ícone desejado
+            builder.AddAttribute(2, "style", "width: inherit; font-size: inherit;");
+            builder.CloseComponent();
+        };
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+}

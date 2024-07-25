@@ -1,0 +1,56 @@
+﻿@using AndOS.Core.Enums
+@using AndOS.Core.Schemas
+@using AndOS.Shared.Requests.Accounts.Delete
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.FluentUI.AspNetCore.Components.Extensions
+@inject ILogger<DialogDelete> Logger
+@inject IDialogService IDialogService
+@inject IToastService ToastService
+@inject IAccountService AccountService
+@implements IDialogContentComponent<AccountDTO>
+@namespace AndOS.Module.UserConfiguration.Components.Accounts.Dialogs
+
+<FluentDialogHeader>
+    <FluentLabel Typo="Typography.H2">Delete Account</FluentLabel>
+</FluentDialogHeader>
+
+<FluentDialogBody>
+    <p>Confirm delete account <b>@Content.Name</b></p>
+</FluentDialogBody>
+
+<FluentDialogFooter>
+    <FluentStack VerticalAlignment="VerticalAlignment.Center" HorizontalAlignment="HorizontalAlignment.Center">
+        <FluentButton Loading=_loading Type="ButtonType.Submit" Appearance="Appearance.Accent" OnClick=Submit>
+            Save
+        </FluentButton>
+    </FluentStack>
+</FluentDialogFooter>
+
+@code {
+    [Parameter] public AccountDTO Content { get; set; } = default!;
+    [CascadingParameter] public FluentDialog Dialog { get; set; } = default!;
+    bool _loading { get; set; } = false;
+
+    async Task Submit()
+    {
+        try
+        {
+            _loading = true;
+            DeleteAccountRequest request = new()
+                {
+                    Id = Content.Id
+                };
+            await AccountService.DeleteAsync(request);
+            await Dialog.CloseAsync();
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, null);
+            ToastService.ShowError("Error Delete Account:\n" + e.Message);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

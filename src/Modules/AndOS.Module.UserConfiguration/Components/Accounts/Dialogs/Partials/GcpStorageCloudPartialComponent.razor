@@ -1,0 +1,14 @@
+﻿@namespace AndOS.Module.UserConfiguration.Components.Accounts.Dialogs.Partials
+@using AndOS.Core.StorageConfigs
+
+<FluentTextArea @bind-Value=Content.BucketName Label="Bucket name" Style="width: 90%" />
+<br />
+<br />
+<FluentTextArea @bind-Value=Content.ProjectId Label="Project id" Style="width: 90%" />
+<br />
+<br />
+<FluentTextArea @bind-Value=Content.CredentialsJson Label="Credential's json" Style="width: 90%" />
+
+@code {
+    [Parameter] public GcpStorageConfig Content { get; set; } = default!;
+}

@@ -1,0 +1,47 @@
+﻿@namespace AndOS.Web.Components.TopBar
+@using AndOS.Domain.Consts
+@using AndOS.Application.Interfaces
+@using AndOS.Infrastructure.Api
+@using AndOS.Infrastructure.Authentication
+@using AndOS.Module.UserConfiguration
+@inject IUserInfo UserInfo
+@inject NavigationManager NavigationManager
+@inject AuthenticationService AuthService
+@inject IWindowManager WindowManager
+@inject IProgramManager ProgramManager
+@inject IProcessManager ProcessManager
+<FluentStack VerticalAlignment="VerticalAlignment.Center" Style="height: 48px; background: var(--neutral-layer-4); padding-inline-end: 10px; ">
+    <FluentStack Style="width: 33%">
+    </FluentStack>
+    <FluentStack Style="width: 33%" HorizontalAlignment="HorizontalAlignment.Center">
+        <TopBarClockComponent />
+    </FluentStack>
+    <FluentStack Style="width: 33%" HorizontalAlignment="HorizontalAlignment.End">
+        <FluentProfileMenu Status="@PresenceStatus.Available"
+                           Initials="@nickName[0].ToString().ToUpper()"
+                           FullName="@nickName"
+                           EMail="@userEmail"
+                           Style="min-width: 330px;"
+                           OnHeaderButtonClick="@AuthService.Logout",
+                           OnFooterLinkClick="@OpenUserConfiguration"/>
+    </FluentStack>
+</FluentStack>
+
+@code {
+    private string nickName = "0";
+    private string userEmail = "0";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        nickName = await UserInfo.GetUserNameAsync();
+        userEmail = await UserInfo.GetEmailAsync();
+    }
+
+    async Task OpenUserConfiguration()
+    {
+        var program = ProgramManager.Programs.First(x => x.GetType() == typeof(UserConfigurationComponent));
+        await ProcessManager.StartAsync(program);
+    }
+}

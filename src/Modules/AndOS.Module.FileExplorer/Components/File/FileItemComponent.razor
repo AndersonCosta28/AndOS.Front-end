@@ -1,0 +1,63 @@
+﻿@inherits SystemItemBaseComponent
+@inject ILogger<FileItemComponent> Logger
+@namespace AndOS.Module.FileExplorer.Components.File
+@using AndOS.Module.FileExplorer.Components.File.Dialogs
+@using AndOS.Module.FileExplorer.Components.File.Dialogs.Delete
+@using AndOS.Module.FileExplorer.Enums
+<div @ref=_container id="@IdElement" style="background-color: @_backgroundColorFocus;
+  user-select: none;
+  padding: 10px;
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 150px;
+  position: relative;
+  border-radius: 10px;
+height: 150px;" @onclick="(e) => LocalSelect(e, !Selected)"
+     @oncontextmenu=ShowMenuItemsAsync>
+    @if (FileExplorerConfig is FileExplorerConfig
+        {
+            Mode: ModeFileExplorer.SelectOne or ModeFileExplorer.SelectMultiple
+        })
+    {
+        <FluentCheckbox style="position: absolute; top: 0px; left: 0px;" Value=Selected ValueChanged=LocalSelect
+                        onclick="event.stopPropagation();event.preventDefault()" />
+    }
+    <BlazorBootstrap.Icon Name="BlazorBootstrap.IconName.FileEarmarkText" Style="width: 90px; height: 90px; font-size: 90px;" />
+    <FluentLabel Style=@style Alignment="HorizontalAlignment.Center">@($"{Content.Name}.{Content.Extension}")</FluentLabel>
+</div>
+
+@code {
+    [Parameter] public ChildrenFileDTO Content { get; set; }
+    string style => $"height: 20px; width: 120px; text-wrap: {_textWrap}; overflow: {_textOverflow}; text-overflow: ellipsis;";
+
+    protected override void OnInitialized()
+    {
+        _logger = Logger;
+
+        MenuItem menuItemRename = new("Rename", RenameAsync);
+        MenuItem menuItemDelete = new("Delete", DeleteAsync);
+        MenuItem menuItemProperties = new("Properties", PropertiesAsync);
+        this._menuItems.AddRange([menuItemRename, menuItemDelete,menuItemProperties]);
+        base.OnInitialized();
+    }
+        async Task RenameAsync()
+    {
+
+        DialogParameters dialogParams = new() { Width = "300px", };
+        await DialogService.ShowDialogAsync<DialogRenameFile>(Content, dialogParams);
+    }
+
+    async Task DeleteAsync()
+    {
+        DialogParameters parameters = new() { Width = "300px", };
+        await DialogService.ShowDialogAsync<DialogDeleteFile>(Content, parameters);
+    }
+
+    Task PropertiesAsync()
+    {
+        return Task.CompletedTask;
+    }
+}

@@ -1,0 +1,17 @@
+.program_item_container {
+    width: 130px;
+    height: 130px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border-radius: 15px;
+    margin: 10px;
+}
+
+.program_item_container_icon {
+    width: 70px;
+    height: 70px;
+    font-size: 70px;
+}

@@ -1,0 +1,106 @@
+﻿@using AndOS.Core.Enums
+@using AndOS.Core.Schemas
+@using AndOS.Module.FileExplorer
+@using AndOS.Module.FileExplorer.Components.Folder
+@using AndOS.Module.FileExplorer.Enums
+@using Microsoft.FluentUI.AspNetCore.Components.Extensions
+@implements IDialogContentComponent<DialogSaveParams>
+@namespace AndOS.Module.FileExplorer.Dialogs.Save
+@inject ILogger<DialogSaveFileExplorerBase> Logger
+@inject IToastService ToastService
+@inject IFileService FileService
+@inject ICloudStorageServiceFactory CloudStorageServiceFactory
+@inject IAccountService AccountService
+<CascadingValue TValue="FileExplorerConfig" Value="config">
+    <FluentDialogBody Style="height: 80%">
+        <FileExplorerComponent Content="@(Content.File?.CurrentPath ?? string.Empty)" @ref=FileExplorerComponentRef
+                               Config="config" />
+    </FluentDialogBody>
+    <FluentDialogFooter onclick="event.preventDefault();">
+        <FluentEditForm OnValidSubmit="Confirm" Model="Model">
+            <FluentStack Orientation="Orientation.Vertical">
+                <FluentStack>
+                    <FluentTextField Required Label="Name" @bind-Value=Model.Name Pattern="@FileSchema.RegexName"
+                                     Minlength="FileSchema.MinLenghtName" Maxlength="FileSchema.MaxLenghtName" Style="width: 300px" />
+                    <FluentTextField Required Label="Extension" @bind-Value=Model.Extension Pattern="@FileSchema.RegexExtension"
+                                     Minlength="FileSchema.MinLenghtExtension" Maxlength="FileSchema.MaxLenghtExtension" Style="width: 70px" />
+                </FluentStack>
+                <FluentStack HorizontalAlignment=" HorizontalAlignment.End">
+                    <FluentButton Loading="_loading" Type="ButtonType.Submit">Save</FluentButton>
+                    <FluentButton Disabled="_loading" OnClick="async () => await Dialog.CancelAsync()">Cancel</FluentButton>
+                </FluentStack>
+            </FluentStack>
+        </FluentEditForm>
+    </FluentDialogFooter>
+</CascadingValue>
+
+@code {
+    public DialogSaveFileExplorerBase()
+    {
+        config = new() { FilesAccepts = "txt", ItemToSelect = Enums.ItemTypeForSelection.Both, Mode = ModeFileExplorer.Save };
+    }
+    bool _loading = false;
+    public class ModelSaveFile
+    {
+        public string Name { get; set; }
+        public string Extension { get; set; }
+    }
+
+    public ModelSaveFile Model { get; set; } = new ModelSaveFile();
+
+    [CascadingParameter] public FluentDialog Dialog { get; set; }
+    [Parameter] public DialogSaveParams Content { get; set; }
+    private FolderDTO Folder { get; set; }
+    FileExplorerComponent FileExplorerComponentRef { get; set; }
+    protected FileExplorerConfig config;
+
+    protected override void OnInitialized()
+    {
+        Logger.LogInformation("Id do arquivo {0}", Content.File.Id);
+
+        Dialog.Instance.Parameters.OnDialogClosing = EventCallback.Factory.Create<DialogInstance>(this, async (DialogInstance instance) =>
+        {
+            await this.FileExplorerComponentRef.DisposeAsync();
+        });
+        base.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Model = new()
+            {
+                Name = Content.File?.Name,
+                Extension = Content.File?.Extension
+            };
+        await base.OnInitializedAsync();
+    }
+
+    protected virtual async Task Confirm()
+    {
+        _loading = true;
+        try
+        {
+            var result = await FileService.CreateAsync(new(
+                                extension: Model.Extension,
+                                name: Model.Name,
+                                parentFolderId: FileExplorerComponentRef.ContentFolder.Id,
+                                size: Content.Value.Length.ToString()
+                            ));
+
+
+            var service = CloudStorageServiceFactory.Create(result.CloudStorage);
+            await service.UploadAsync(result.Url, Content.Value);
+            ToastService.ShowSuccess("File saved successfully");
+            await Dialog.CloseAsync();
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(null, e);
+            ToastService.ShowError($"Error on create file:\n{e.Message}");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

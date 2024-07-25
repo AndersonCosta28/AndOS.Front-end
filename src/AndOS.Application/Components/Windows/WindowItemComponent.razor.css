@@ -1,0 +1,59 @@
+﻿.window_container {
+    border: 1px solid var(--window-border-color);
+    background-color: #f0f0f0; /* Fundo claro */
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-radius: var(--window-header-radius);
+    box-shadow: 0 4px 6px var(--window-shadow-color);
+}
+
+.window_container_header {
+    height: var(--window-header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    background-color: var(--window-header-bg-color);
+    border-bottom: 1px solid var(--window-border-color);
+    border-radius: var(--window-header-radius) var(--window-header-radius) 0 0;
+}
+
+.window_container_header_focused {
+    background-color: var(--window-header-focused-bg-color);
+}
+
+.window_container_header_left {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Trunca o texto com reticências se for muito longo */
+    white-space: nowrap; /* Mantém o texto em uma única linha */
+    width: 100%;
+}
+
+.window_container_header_right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Alinha os ícones à direita */
+    padding: 0 10px; /* Adiciona padding interno */
+}
+
+.window_container_header_right_option {
+    padding: 5px;
+    margin: 0 5px; /* Ajusta o espaçamento entre os ícones */
+    cursor: pointer; /* Muda o cursor para indicar que é clicável */
+}
+
+    .window_container_header_right_option:hover {
+        background-color: #d1d1d1; /* Muda a cor de fundo para cinza-claro ao passar o mouse */
+        border-radius: 25px;
+    }
+
+.window_container_body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden; /*Permite rolagem se necessário */
+}

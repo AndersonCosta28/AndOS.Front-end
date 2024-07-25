@@ -1,0 +1,44 @@
+﻿@using AndOS.Application.Interfaces
+@using AndOS.Shared.Requests.Folders.Delete
+@inject ILogger<DialogDeleteFolder> Logger
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject IFolderService FolderService
+@implements IDialogContentComponent<ChildrenFolderDTO>
+@namespace AndOS.Module.FileExplorer.Components.Folder.Dialogs.Delete
+
+<FluentDialogHeader>
+    <FluentLabel Typo="Typography.H4">Delete folder</FluentLabel>
+</FluentDialogHeader>
+<FluentDialogBody>
+    <p>Confirm delete folder <b>@Content.Name</b></p>
+</FluentDialogBody>
+<FluentDialogFooter>
+    <FluentButton Loading=loading Appearance=Appearance.Accent OnClick="Delete">Yes</FluentButton>
+    <FluentButton OnClick="async (e) => await Dialog.CloseAsync()">No</FluentButton>
+</FluentDialogFooter>
+@code {
+    [Parameter] public ChildrenFolderDTO Content { get; set; }
+    [CascadingParameter] public FluentDialog Dialog { get; set; }
+
+    bool loading = false;
+
+    async Task Delete()
+    {
+        try
+        {
+            loading = true;
+            DeleteFolderRequest request = new(Content.Id);
+            await FolderService.DeleteAsync(request);
+            await Dialog.CloseAsync();
+        }
+        catch (Exception e)
+        {
+            ToastService.ShowError("Error delete folder:\n" + e.Message);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

@@ -1,0 +1,68 @@
+﻿@inherits AndOSBaseComponent
+@inject ILogger<WindowTaskBarComponent> Logger
+
+<div class="window-taskbar-component" @key=Process @onclick="TooglerAsync" @ref=_container
+    @oncontextmenu="ShowMenuItemsAsync">
+    <div style="width: 30px; font-size: 30px; margin: 5px">
+        @Process.Program.Icon
+    </div>
+    @if (Process.Window.Focused)
+    {
+        <div class="window-taskbar-component-focus-indicator"></div>
+    }
+</div>
+
+@code {
+    [Parameter] public Process Process { get; set; }
+
+    protected override void OnInitialized()
+    {
+        EnableLoggingOnAfterRenderAsync = false;
+        EnableLoggingOnAfterRender = false;
+        _logger = Logger;
+        base.OnInitialized();
+    }
+
+    async Task ClickAsync(Window window)
+    {
+        Logger.LogInformation("Clicando no window {0}", window.Id);
+        await WindowManager.FocusAsync(window);
+    }
+
+    async Task TooglerAsync()    
+    {
+        if (Process.Window.Focused)
+            await HideAsync();
+        else
+            await ShowAsync();
+    }
+
+    async Task CloseAsync()
+    {
+        await ProcessManager.EndAsync(this.Process);
+    }
+
+    async Task ShowAsync()
+    {
+        await WindowManager.FocusAsync(this.Process.Window);
+    }
+
+    async Task HideAsync()
+    {
+        await WindowManager.HideAsync(this.Process.Window);
+    }
+
+    protected override async Task ShowMenuItemsAsync(MouseEventArgs args)
+    {
+        _menuItems.Clear();
+        MenuItem menuItemShow = new("Show", ShowAsync);
+        MenuItem menuItemHide = new("Hide", HideAsync);
+        MenuItem menuItemClose = new("Close", CloseAsync);
+        if (Process.Window.Hide)
+            _menuItems.Add(menuItemShow);
+        else
+            _menuItems.Add(menuItemHide);
+        _menuItems.Add(menuItemClose);
+        await base.ShowMenuItemsAsync(args);
+    }
+}

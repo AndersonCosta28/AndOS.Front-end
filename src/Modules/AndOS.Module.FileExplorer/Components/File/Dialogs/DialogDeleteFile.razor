@@ -1,0 +1,45 @@
+﻿@using AndOS.Application.Interfaces
+@using AndOS.Shared.Requests.Files.Delete
+@inject ILogger<DialogDeleteFile> Logger
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject IFileService FileService
+@implements IDialogContentComponent<ChildrenFileDTO>
+@namespace AndOS.Module.FileExplorer.Components.File.Dialogs.Delete
+
+<FluentDialogHeader>
+    <FluentLabel Typo="Typography.H4">Delete file</FluentLabel>
+</FluentDialogHeader>
+<FluentDialogBody>
+    <p>Confirm delete file <b>@Content.Name</b></p>
+</FluentDialogBody>
+<FluentDialogFooter>
+    <FluentButton Loading=loading Appearance=Appearance.Accent OnClick="Delete">Yes</FluentButton>
+    <FluentButton OnClick="async (e) => await Dialog.CloseAsync()">No</FluentButton>
+</FluentDialogFooter>
+
+@code {
+    [Parameter] public ChildrenFileDTO Content { get; set; }
+    [CascadingParameter] public FluentDialog Dialog { get; set; }
+
+    bool loading = false;
+
+    async Task Delete()
+    {
+        try
+        {
+            loading = true;
+            DeleteFileRequest request = new(Content.Id);
+            await FileService.DeleteAsync(request);
+            await Dialog.CloseAsync();
+        }
+        catch (Exception e)
+        {
+            ToastService.ShowError("Error delete file:\n" + e.Message);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

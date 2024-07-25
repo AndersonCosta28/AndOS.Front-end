@@ -1,0 +1,31 @@
+﻿@using AndOS.Module.FileExplorer.Components.Folder
+@using AndOS.Module.FileExplorer.Enums
+@inherits DialogSelectFileExplorerBase<SelectedFolder>
+@namespace AndOS.Module.FileExplorer.Dialogs.Select.Folders
+@inject ILogger<DialogSelectFolder> Logger
+@inject IFolderService FolderService
+
+@{
+    base.BuildRenderTree(__builder);
+}
+
+@code {
+    public DialogSelectFolder()
+    {
+        config = new() { FilesAccepts = "txt", ItemToSelect = ItemTypeForSelection.Folder, Mode = ModeFileExplorer.SelectOne };
+    }
+
+    protected override async Task Confirm()
+    {
+        var folderSelect = ((FolderItemComponent)config.ItemsSelect.FirstOrDefault())?.Content;
+        if (folderSelect is ChildrenFolderDTO childrenFolder)
+        {
+            var folder = new SelectedFolder(folderSelect.Id, folderSelect.Name);
+            await Dialog.CloseAsync(folder);
+            return;
+        }
+
+        var currentFolderOpened = new SelectedFolder(FileExplorerComponentRef.ContentFolder.Id, FileExplorerComponentRef.ContentFolder.Name);
+        await Dialog.CloseAsync(currentFolderOpened);
+    }
+}

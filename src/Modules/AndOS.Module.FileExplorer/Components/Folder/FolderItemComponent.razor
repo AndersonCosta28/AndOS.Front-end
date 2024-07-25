@@ -1,0 +1,90 @@
+﻿@using AndOS.Module.FileExplorer.Components.Folder.Dialogs.Create
+@using AndOS.Module.FileExplorer.Components.Folder.Dialogs.Rename
+@using AndOS.Module.FileExplorer.Components.Folder.Dialogs.Delete
+@using AndOS.Module.FileExplorer.Dialogs
+@using AndOS.Module.FileExplorer.Enums
+@using AndOS.Module.FileExplorer.Params.OpenFolder
+@using AndOS.Module.FileExplorer
+@inject ILogger<FolderItemComponent> Logger
+@inherits SystemItemBaseComponent
+@namespace AndOS.Module.FileExplorer.Components.Folder
+
+<div @ref=_container id="@IdElement" style="background-color: @_backgroundColorFocus;
+                                            user-select: none;
+                                            padding: 10px;
+                                            margin: 10px;
+                                            display: flex;
+                                            flex-direction: column;
+                                            justify-content: center;
+                                            align-items: center;
+                                            width: 150px;
+                                            position: relative;
+                                            border-radius: 10px;
+                                            height: 150px;" @ondblclick="OpenAsync" @onclick="(e) => LocalSelect(e, !Selected)" @oncontextmenu=ShowMenuItemsAsync>
+    @if (FileExplorerConfig is FileExplorerConfig
+        {
+            Mode: ModeFileExplorer.SelectOne or ModeFileExplorer.SelectMultiple
+        })
+    {
+        <FluentCheckbox style="position: absolute; top: 0px; left: 0px;" Value=Selected ValueChanged=LocalSelect
+                        onclick="event.stopPropagation();event.preventDefault()" />
+    }
+    @* <FluentIcon style="width: 90px;" Value="@(new Icons.Regular.Size24.Folder().WithColor("black"))" /> *@
+    @* <img src=@(Content.Icon ?? IconConsts.Folder) alt="Ícone de Pasta" style="width: 90px; height: 90px;font-size:
+    90px;" /> *@
+    <FluentIcon Value="@(new Icons.Regular.Size20.Folder())" Style="width: 90px; height: 90px; font-size: 90px;" Color="Color.Custom" CustomColor="#333" />
+    @* FileEarmarkText *@
+    <FluentLabel Alignment="HorizontalAlignment.Center">@Content.Name</FluentLabel>
+</div>
+
+@code {
+    [Parameter] public EventCallback<IOpenFolderParams> OnOpen { get; set; }
+    [Parameter] public ChildrenFolderDTO Content { get; set; }
+
+    private Dictionary<string, object> modalParam => new() { { "Folder", Content } };
+    protected override void OnInitialized()
+    {
+        _logger = Logger;
+
+        this.IdElement = $"Folder-{Guid.NewGuid()}-{Content.Id}";
+        MenuItem menuItemOpen = new("Open", OpenAsync, callBackDisabled: () => Task.FromResult(!Content.Permissions.Contains(Core.Enums.FolderPermission.Read)));
+        MenuItem menuItemRename = new("Rename", RenameAsync, callBackDisabled: () => Task.FromResult(!Content.Permissions.Contains(Core.Enums.FolderPermission.Rename)));
+        MenuItem menuItemDelete = new("Delete", DeleteAsync, callBackDisabled: () => Task.FromResult(!Content.Permissions.Contains(Core.Enums.FolderPermission.Delete)));
+        MenuItem menuItemProperties = new("Properties", PropertiesAsync);
+
+        this._menuItems.AddRange([menuItemOpen, @* menuItemCopy, menuItemCut,*@ menuItemRename, menuItemDelete, menuItemProperties]);
+        base.OnInitialized();
+    }
+
+    #region Context menu functions
+    async Task OpenAsync()
+    {
+        try
+        {
+            await OnOpen.InvokeAsync(new OpenFolderById(Content.Id, NavigationType.Default, false, true));
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(null, e);
+            ToastService.ShowError(e.Message);
+        }
+    }
+
+    async Task RenameAsync()
+    {
+        DialogParameters dialogParams = new() { Width = "300px", };
+        await DialogService.ShowDialogAsync<DialogRenameFolder>(Content, dialogParams);
+    }
+
+    async Task DeleteAsync()
+    {
+        DialogParameters parameters = new() { Width = "300px", };
+        await DialogService.ShowDialogAsync<DialogDeleteFolder>(Content, parameters);
+    }
+
+    Task PropertiesAsync()
+    {
+        return Task.CompletedTask;
+    }
+    #endregion
+}

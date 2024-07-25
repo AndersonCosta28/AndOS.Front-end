@@ -1,0 +1,45 @@
+﻿
+@inject IContextMenuManager ContextMenuManager
+@inject ILogger<ProgramItemComponent> Logger
+@inherits AndOSBaseComponent
+@namespace AndOS.Application.Components.Programs
+
+<div id=@IdElement @ref="_container" style="background-color: @_backgroundColorFocus;" class="program_item_container"
+     @ondblclick="OpenAsync" @onclick="() => Selected = true" @oncontextmenu=ShowMenuItemsAsync>
+    <div class="program_item_container_icon">
+        @Content.Icon
+    </div>
+    <p id="program_container_name" style="text-align: center">@Content.Name</p>
+</div>
+
+@code {
+    [Parameter] public Program Content { get; set; }
+    protected override void OnInitialized()
+    {
+        _logger = Logger;
+        this.IdElement = $"program-{Content.Id}";
+        MenuItem menuItemOpen = new("Open", OpenAsync);
+        MenuItem menuItemUninstall = new("Uninstall", UninstallAsync);
+        MenuItem menuItemProperties = new("Properties", PropertiesAsync);
+        this._menuItems.Add(menuItemOpen);
+        if (this.Content.IsExternalProgram)
+            this._menuItems.Add(menuItemUninstall);
+        this._menuItems.Add(menuItemProperties);
+        base.OnInitialized();
+    }
+
+    async Task OpenAsync()
+    {
+        await ProcessManager.StartAsync(this.Content);
+    }
+
+    async Task UninstallAsync()
+    {
+        await ProgramManager.RemoveExternalAssemblyAsync((this.Content).Assembly);
+    }
+
+    Task PropertiesAsync()
+    {
+        return Task.CompletedTask;
+    }
+}

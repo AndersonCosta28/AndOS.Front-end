@@ -1,0 +1,41 @@
+﻿@using AndOS.Module.FileExplorer.Components.Folder
+@using AndOS.Module.FileExplorer.Enums
+@typeparam T where T : class
+@implements IDialogContentComponent<T>
+@namespace AndOS.Module.FileExplorer.Dialogs
+@inject ILogger<DialogSelectFileExplorerBase<T>> Logger
+
+<CascadingValue TValue="FileExplorerConfig" Value="config">
+    <FluentDialogBody Style="height: 80%">
+        <FileExplorerComponent Content="@string.Empty" @ref=FileExplorerComponentRef
+                               Config="config" />
+    </FluentDialogBody>
+    <FluentDialogFooter>
+        <div onclick="event.preventDefault();">
+            <FluentButton OnClick="Confirm">Confirm</FluentButton>
+            <FluentButton OnClick="async () => await Dialog.CancelAsync()">Cancel</FluentButton>
+        </div>
+    </FluentDialogFooter>
+</CascadingValue>
+
+@code {
+    [CascadingParameter] public FluentDialog Dialog { get; set; }
+    [Parameter] public T Content { get; set; }
+
+    protected FileExplorerComponent FileExplorerComponentRef;
+    protected FileExplorerConfig config;
+    protected virtual Task Confirm()
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override void OnInitialized()
+    {
+        Dialog.Instance.Parameters.OnDialogClosing = EventCallback.Factory.Create<DialogInstance>(this, async (DialogInstance instance) =>
+        {
+            await this.FileExplorerComponentRef.DisposeAsync();
+        });
+
+        base.OnInitialized();
+    }
+}

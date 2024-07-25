@@ -1,0 +1,95 @@
+﻿@page "/authentication/register"
+@using AndOS.Core.Schemas
+@using AndOS.Infrastructure.Api
+@using AndOS.Infrastructure.Authentication
+@using System.ComponentModel.DataAnnotations
+@namespace AndOS.Web.Pages.Register
+@inject AuthenticationService AuthServices
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+@inject ILogger<Register> Logger
+<div class="register-page">
+    <div class="register-form">
+        <EditForm OnValidSubmit="@HandleValidSubmit" EditContext="EditContext">
+            <DataAnnotationsValidator />
+            <FluentValidationSummary />
+            <FluentTextField id="email" @bind-Value="registerModel.Email" Label="Email" Placeholder="Email" TextFieldType="TextFieldType.Email" Style="width: 100%; margin-bottom: 10px;" />
+            <FluentValidationMessage For="@(() => registerModel.Email)" />
+
+            <FluentTextField id="nickname" @bind-Value="registerModel.UserName" Label="User name" Placeholder="User name" Style="width: 100%; margin-bottom: 10px;" />
+            <FluentValidationMessage For="@(() => registerModel.UserName)" />
+
+            <FluentTextField id="password" @bind-Value="registerModel.Password" Label="Password" Placeholder="Password" TextFieldType="TextFieldType.Password" Style="width: 100%; margin-bottom: 10px;" />
+            <FluentValidationMessage For="@(() => registerModel.Password)" />
+
+            <FluentTextField id="confirmPassword" @bind-Value="registerModel.ConfirmPassword" Label="Confirm password" Placeholder="Confirm Password" TextFieldType="TextFieldType.Password" Style="width: 100%; margin-bottom: 10px;" />
+            <FluentValidationMessage For="@(() => registerModel.ConfirmPassword)" />
+
+            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%; background-color: #0078d4; color: #ffffff;" Loading=loading>Register</FluentButton>
+        </EditForm>
+        <p>
+            Already have an account? <span class="hiperlink" @onclick=GoToLogin>Login</span>
+        </p>
+    </div>
+</div>
+
+@code {
+
+    private EditContext EditContext;
+    private RegisterModel registerModel = new RegisterModel();
+    private bool loading = false;
+
+    protected override void OnInitialized()
+    {
+        EditContext = new EditContext(registerModel);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (!EditContext.Validate())
+            return;
+
+        try
+        {
+            loading = true;
+            await AuthServices.Register(registerModel.Email, registerModel.UserName, registerModel.Password, registerModel.ConfirmPassword);
+
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, e.Message);
+            ToastService.ShowError(e.Message);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private void GoToLogin()
+    {
+        NavigationManager.NavigateTo("/authentication/login");
+    }
+
+    public class RegisterModel
+    {
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email address.")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Password is required.")]
+        [StringLength(UserSchema.MaxLenghtPassword, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = UserSchema.MinLenghtPassword)]
+        [RegularExpression(UserSchema.RegexPassword, ErrorMessage = "Password must contain at least one digit, one uppercase letter, one lowercase letter, and one special character.")]
+        public string Password { get; set; }
+
+        [Required(ErrorMessage = "Confirm password is required.")]
+        [Compare("Password", ErrorMessage = "Passwords do not match.")]
+        public string ConfirmPassword { get; set; }
+
+
+        [Required(ErrorMessage = "UserName is required.")]
+        [StringLength(UserSchema.MaxLenghtUserName, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = UserSchema.MinLenghtUserName)]
+        [RegularExpression(UserSchema.RegexUserName, ErrorMessage = "Password must contain at least one digit, one uppercase letter, one lowercase letter, and one special character.")]
+        public string UserName { get; set; } = string.Empty;
+    }
+}
