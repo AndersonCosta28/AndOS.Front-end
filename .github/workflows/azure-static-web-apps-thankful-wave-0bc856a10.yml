@@ -10,6 +10,7 @@ on:
       - master
 env:
   AND_OS_TOKEN: ${{ secrets.PAT_WORKFLOW }}
+  AZURE_STATIC_WEB_APPS_LOCATION: 'dist'
 
 jobs:
   build_and_deploy_job:
