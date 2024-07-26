@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 // Adiciona o arquivo de configuração appsettings.json
-builder.Configuration.AddJsonFile("appsettings.json");
+Console.WriteLine(builder.HostEnvironment.Environment);
+builder.Configuration.AddJsonFile("appsettings.json", false, true)
+                        .AddJsonFile($"appsettings.{builder.HostEnvironment.Environment}.json");
 
 // Configurações adicionais
 WebAssemblyHostConfiguration configuration = builder.Configuration;
