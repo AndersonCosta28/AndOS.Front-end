@@ -29,18 +29,13 @@
         <FluentCheckbox style="position: absolute; top: 0px; left: 0px;" Value=Selected ValueChanged=LocalSelect
                         onclick="event.stopPropagation();event.preventDefault()" />
     }
-    @* <FluentIcon style="width: 90px;" Value="@(new Icons.Regular.Size24.Folder().WithColor("black"))" /> *@
-    @* <img src=@(Content.Icon ?? IconConsts.Folder) alt="Ícone de Pasta" style="width: 90px; height: 90px;font-size:
-    90px;" /> *@
     <FluentIcon Value="@(new Icons.Regular.Size20.Folder())" Style="width: 90px; height: 90px; font-size: 90px;" Color="Color.Custom" CustomColor="#333" />
-    @* FileEarmarkText *@
     <FluentLabel Alignment="HorizontalAlignment.Center">@Content.Name</FluentLabel>
 </div>
 
 @code {
     [Parameter] public EventCallback<IOpenFolderParams> OnOpen { get; set; }
     [Parameter] public ChildrenFolderDTO Content { get; set; }
-
     private Dictionary<string, object> modalParam => new() { { "Folder", Content } };
     protected override void OnInitialized()
     {

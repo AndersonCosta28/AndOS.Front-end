@@ -1,0 +1,67 @@
+﻿@using AndOS.Application.Components
+@using AndOS.Module.FileExplorer.Components.Folder
+@using AndOS.Application.Components.Programs
+@using AndOS.Application.Components.Programs.Dialogs
+@using AndOS.Application.Interfaces
+@using AndOS.Module.FileExplorer
+@using AndOS.Web.Layout
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.FluentUI.AspNetCore.Components
+@using AndOS.Application.Components.Windows
+@inject ILogger<Desktop> Logger
+@inherits AndOSBaseComponent
+@layout MainLayout
+@attribute [Authorize]
+@page "/Desktop"
+
+<PageTitle>Desktop</PageTitle>
+<div id="@IdElement" @oncontextmenu="ShowMenuItemsAsync">
+    <WindowListComponent />
+    <ProgramListComponent />
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        _logger = Logger;
+        this.IdElement = "home_container";
+        MenuItem menuItemAddProgramFromDisk = new("From disk", AddProgramFromDiskAsync);
+
+        MenuItem menuItemAddProgram = new("Add program", [menuItemAddProgramFromDisk]);
+        MenuItem menuItemRefresh = new("Refresh", refreshAsync);
+        MenuItem menuItemProperties = new("Properties", PropertiesAsync);
+
+        this._menuItems.AddRange([menuItemAddProgram, menuItemRefresh, menuItemProperties]);
+        base.OnInitialized();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await ProgramManager.LoadAssembliesAsync();
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    #region Context functions
+
+    async Task AddProgramFromDiskAsync()
+    {
+        Logger.Log(LogLevel.Information, "{0}.{1} executed", nameof(Desktop), nameof(AddProgramFromDiskAsync));
+        DialogParameters dialogParameters = new()
+            {
+                Width = "600px"
+            };
+        var dialog = await DialogService.ShowDialogAsync<DialogAddProgramByPath>(dialogParameters);
+        var result = await dialog.Result;
+    }
+
+    Task PropertiesAsync()
+    {
+        Logger.Log(LogLevel.Information, "{0}.{1} executed", nameof(Desktop), nameof(PropertiesAsync));
+        return Task.CompletedTask;
+    }
+
+    #endregion
+}

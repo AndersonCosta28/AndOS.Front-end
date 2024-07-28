@@ -8,12 +8,12 @@ public class FileExplorerDialogs(IDialogService dialogService, IToastService toa
 {
     public async Task SaveAsAsync(FileDTO file, string text)
     {
-        DialogSaveParams data = new()
+        var data = new DialogSaveParams()
         {
             File = file,
             Value = text,
         };
-        DialogParameters parameters = new()
+        var parameters = new DialogParameters()
         {
             Width = "70%",
             Height = "70%",
@@ -33,15 +33,15 @@ public class FileExplorerDialogs(IDialogService dialogService, IToastService toa
             PreventScroll = true
         };
 
-        IDialogReference dialogReference = await dialogService.ShowDialogAsync<DialogSelectFile>(parameters);
-        DialogResult result = await dialogReference.Result;
+        var dialogReference = await dialogService.ShowDialogAsync<DialogSelectFile>(parameters);
+        var result = await dialogReference.Result;
 
         if (!result.Cancelled && result.Data is SelectedFile file)
             return file;
         else
         {
-            string message = "Nenhum item foi selecionada";
-            logger.LogInformation(message);
+            var message = "Nenhum item foi selecionada";
+            logger.Log(LogLevel.Debug, message);
             toastService.ShowError(message);
             return null;
         }

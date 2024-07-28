@@ -1,5 +1,4 @@
-﻿
-@using AndOS.Module.FileExplorer.Enums
+﻿@using AndOS.Module.FileExplorer.Enums
 @using AndOS.Module.FileExplorer.Params.OpenFolder
 @using AndOS.Module.FileExplorer.Components.Folder
 @using AndOS.Module.FileExplorer.Components.Folder.Dialogs.Create
@@ -51,7 +50,7 @@
             builder.AddAttribute(1, "Value", new Icons.Regular.Size20.FolderSearch()); // Substitua pelo ícone desejado
             builder.AddAttribute(2, "style", "width: inherit; font-size: inherit;");
             builder.AddAttribute(3, "Color", Color.Custom);
-            builder.AddAttribute(4, "CustomColor", "#333");             
+            builder.AddAttribute(4, "CustomColor", "#333");
             builder.CloseComponent();
         };
     }
@@ -64,6 +63,7 @@
             ItemsSelect = [],
             ItemToSelect = ItemTypeForSelection.Both,
             Mode = ModeFileExplorer.SelectOne,
+            CanOpenFiles = true
         };
     public FolderDTO ContentFolder { get; set; }
 
@@ -118,7 +118,7 @@
     #region Life-cycle functions
     protected override void OnInitialized()
     {
-        Logger.LogInformation("Value of {0} is {1}", nameof(Content), Content);
+        Logger.Log(LogLevel.Debug, "Value of {0} is {1}", nameof(Content), Content);
         IdElement = $"system-file-{Guid.NewGuid()}";
         MenuItem menuItemNewFolder = new("New folder", NewFolderAsync, callBackDisabled: () => Task.FromResult(!ContentFolder.Permissions.Contains(Core.Enums.FolderPermission.Read)));
         MenuItem menuItemRefresh = new("Refresh", refreshAsync);
@@ -157,7 +157,7 @@
 
     async Task UpdatePath()
     {
-        Logger.LogInformation("Perfom {0}", nameof(UpdatePath));
+        Logger.Log(LogLevel.Debug, "Perfom {0}", nameof(UpdatePath));
         if (Content is { Length: 0 })
             Content = "";
         await LoadFolders(new OpenFolderByPath(Content, NavigationType.Default, false, true));
@@ -176,11 +176,11 @@
         try
         {
             string oldPath = Content;
-            Logger.LogInformation("Value of {0}: {1}", nameof(oldPath), oldPath);
+            Logger.Log(LogLevel.Debug, "Value of {0}: {1}", nameof(oldPath), oldPath);
             overlayVisible = true;
             ContentFolder = await FolderService.GetByPathAsync(new(param.Path));
             Content = ContentFolder.FullPath;
-            Logger.LogInformation("Value of {0}: {1}", nameof(oldPath), oldPath);
+            Logger.Log(LogLevel.Debug, "Value of {0}: {1}", nameof(oldPath), oldPath);
             HandleNavigation(param, oldPath);
         }
         catch (Exception e)
@@ -199,12 +199,12 @@
         try
         {
             string oldPath = Content;
-            Logger.LogInformation("Value of {0}: {1}", nameof(oldPath), oldPath);
+            Logger.Log(LogLevel.Debug, "Value of {0}: {1}", nameof(oldPath), oldPath);
 
             overlayVisible = true;
             ContentFolder = await FolderService.GetByIdAsync(new(param.Id));
             Content = ContentFolder.FullPath;
-            Logger.LogInformation("Value of {0}: {1}", nameof(oldPath), oldPath);
+            Logger.Log(LogLevel.Debug, "Value of {0}: {1}", nameof(oldPath), oldPath);
 
             HandleNavigation(param, oldPath);
         }
@@ -221,7 +221,7 @@
 
     async Task NewFolderAsync()
     {
-        Logger.LogInformation("{0}.{1} executed", nameof(FileExplorerComponent), nameof(NewFolderAsync));
+        Logger.Log(LogLevel.Debug, "{0}.{1} executed", nameof(FileExplorerComponent), nameof(NewFolderAsync));
         var createParams = new CreateFolderParameters() { ParentFolder = ContentFolder };
         var dialogParams = new DialogParameters() { Width = "300px" };
         await DialogService.ShowDialogAsync<DialogCreateFolder>(createParams, dialogParams);

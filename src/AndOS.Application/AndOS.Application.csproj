@@ -5,14 +5,16 @@
     <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="AndOS.Shared" Version="1.0.0">
-      <PackageSource>https://nuget.pkg.github.com/AndersonCosta28/index.json</PackageSource>
-    </PackageReference>
-  </ItemGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="..\AndOS.Domain\AndOS.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <ProjectReference Include="..\..\..\AndOS.Shared\AndOS.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <PackageReference Include="AndOS.Shared" Version="1.0.0" />
   </ItemGroup>
 </Project>

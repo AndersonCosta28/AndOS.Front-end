@@ -1,49 +1,47 @@
 ﻿@inherits SystemItemBaseComponent
 @inject ILogger<FileItemComponent> Logger
 @namespace AndOS.Module.FileExplorer.Components.File
+@using AndOS.Application.Dialogs.SelectProgramToOpenFile
 @using AndOS.Module.FileExplorer.Components.File.Dialogs
 @using AndOS.Module.FileExplorer.Components.File.Dialogs.Delete
 @using AndOS.Module.FileExplorer.Enums
-<div @ref=_container id="@IdElement" style="background-color: @_backgroundColorFocus;
-  user-select: none;
-  padding: 10px;
-  margin: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 150px;
-  position: relative;
-  border-radius: 10px;
-height: 150px;" @onclick="(e) => LocalSelect(e, !Selected)"
-     @oncontextmenu=ShowMenuItemsAsync>
+
+<div @ref=_container
+     id="@IdElement"
+     style=@containerStyle
+     @onclick="(e) => LocalSelect(e, !Selected)"
+     @oncontextmenu=ShowMenuItemsAsync
+     @ondblclick=OpenAsync>
     @if (FileExplorerConfig is FileExplorerConfig
         {
             Mode: ModeFileExplorer.SelectOne or ModeFileExplorer.SelectMultiple
         })
     {
-        <FluentCheckbox style="position: absolute; top: 0px; left: 0px;" Value=Selected ValueChanged=LocalSelect
+        <FluentCheckbox Style=@checkboxStyle Value=Selected ValueChanged=LocalSelect
                         onclick="event.stopPropagation();event.preventDefault()" />
     }
-    <BlazorBootstrap.Icon Name="BlazorBootstrap.IconName.FileEarmarkText" Style="width: 90px; height: 90px; font-size: 90px;" />
-    <FluentLabel Style=@style Alignment="HorizontalAlignment.Center">@($"{Content.Name}.{Content.Extension}")</FluentLabel>
+    <BlazorBootstrap.Icon Name="BlazorBootstrap.IconName.FileEarmarkText" Style=@iconStyle />
+    <FluentLabel Style=@labelStyle Alignment="HorizontalAlignment.Center">@($"{Content.Name}.{Content.Extension}")</FluentLabel>
 </div>
 
 @code {
     [Parameter] public ChildrenFileDTO Content { get; set; }
-    string style => $"height: 20px; width: 120px; text-wrap: {_textWrap}; overflow: {_textOverflow}; text-overflow: ellipsis;";
 
+    string labelStyle => $"height: 20px; width: 120px; text-wrap: {_textWrap}; overflow: {_textOverflow}; text-overflow: ellipsis;";
+    string containerStyle => $"background-color: {_backgroundColorFocus}; user-select: none; padding: 10px; margin: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 150px; position: relative; border-radius: 10px; height: 150px;";
+    string iconStyle => "width: 90px; height: 90px; font-size: 90px;";
+    string checkboxStyle => "position: absolute; top: 0px; left: 0px;";
     protected override void OnInitialized()
     {
         _logger = Logger;
-
+        MenuItem menuItemOpen = new("Open", OpenAsync, callBackDisabled: () => Task.FromResult(FileExplorerConfig.CanOpenFiles));
         MenuItem menuItemRename = new("Rename", RenameAsync);
         MenuItem menuItemDelete = new("Delete", DeleteAsync);
         MenuItem menuItemProperties = new("Properties", PropertiesAsync);
-        this._menuItems.AddRange([menuItemRename, menuItemDelete,menuItemProperties]);
+        this._menuItems.AddRange([menuItemOpen, menuItemRename, menuItemDelete, menuItemProperties]);
         base.OnInitialized();
     }
-        async Task RenameAsync()
+    async Task RenameAsync()
     {
 
         DialogParameters dialogParams = new() { Width = "300px", };
@@ -54,6 +52,42 @@ height: 150px;" @onclick="(e) => LocalSelect(e, !Selected)"
     {
         DialogParameters parameters = new() { Width = "300px", };
         await DialogService.ShowDialogAsync<DialogDeleteFile>(Content, parameters);
+    }
+
+    async Task OpenAsync()
+    {
+        if (!FileExplorerConfig.CanOpenFiles)
+            return;
+
+        var response = await UserPreferenceService.GetDefaultProgramByExtensionAsync(new(Content.Extension));
+        if (!string.IsNullOrWhiteSpace(response.DefaultProgramToExtension.Program))
+        {
+            var program = ProgramManager.Programs.Find(x => x.Name == response.DefaultProgramToExtension.Program);
+            if (program != null)
+            {
+                program.Arguments["FileId"] = this.Content.Id;
+                await ProcessManager.StartAsync(program);
+                return;
+            }
+        }
+        var param = new DialogParameters()
+            {
+                Title = $"Select program",
+                Modal = false,
+                Width = "30%",
+                Height = "70%",
+                PreventScroll = true
+            };
+        var content = new SelectProgramToOpenFileParams(Content.Extension);
+
+        var dialog = await DialogService.ShowDialogAsync<SelectProgramToOpenFileDialog>(content, param);
+        var result = await dialog.Result;
+        if (result.Cancelled && result.Data is null)
+            return;
+
+        var programSelected = (Program)result.Data;
+        programSelected.Arguments["FileId"] = this.Content.Id;
+        await ProcessManager.StartAsync(programSelected);
     }
 
     Task PropertiesAsync()

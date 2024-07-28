@@ -102,8 +102,8 @@ else
 
         _removeListenersFunctionId = await JSRuntime.InvokeAsync<string>("draggableFunctions.startDrag", _container,
         _headerLeftReference, _objectReference);
-        Logger.LogInformation("result: {0}", _removeListenersFunctionId);
-        Logger.LogInformation(nameof(AttachDraggable));
+        Logger.Log(LogLevel.Debug,"result: {0}", _removeListenersFunctionId);
+        Logger.Log(LogLevel.Debug, nameof(AttachDraggable));
     }
 
     async Task UnattachDraggable()
@@ -113,7 +113,7 @@ else
 
         await JSRuntime.InvokeVoidAsync("draggableFunctions.removeListeners", _removeListenersFunctionId);
         _removeListenersFunctionId = string.Empty;
-        Logger.LogInformation(nameof(UnattachDraggable));
+        Logger.Log(LogLevel.Debug, nameof(UnattachDraggable));
     }
 
     public void UpdateTitle(string title)
@@ -287,14 +287,14 @@ else
     [JSInvokable]
     public void OnResize(string widthInPx, string heightInPx)
     {
-        Logger.LogInformation("Redimensionando...");
+        Logger.Log(LogLevel.Debug, "Redimensionando...");
         (Content.Window.Width, Content.Window.Height) = (widthInPx, heightInPx);
     }
 
     [JSInvokable]
     public void OnDrag(string left, string top)
     {
-        Logger.LogInformation("Arrastando...");
+        Logger.Log(LogLevel.Debug, "Arrastando...");
         (Content.Window.Left, Content.Window.Top) = (left, top);
     }
     #endregion

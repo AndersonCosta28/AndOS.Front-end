@@ -1,7 +1,6 @@
 ﻿@using AndOS.Application.Components
 @using AndOS.Core.Extensions
 @using AndOS.Module.UserConfiguration.Components.Accounts.Dialogs
-@inject HttpClient Http
 @inject NavigationManager NavManager
 @inject ILogger<AccountsComponent> Logger
 @inherits AndOSBaseComponent
@@ -15,7 +14,7 @@
 </FluentButton>
 
 <div style="height: 434px; overflow:auto;" tabindex="-1">
-    <FluentDataGrid @ref="grid" ItemsProvider="accountsProvider" Virtualize="true" ItemSize="46" Loading="_loading"
+    <FluentDataGrid @ref="grid" ItemsProvider="accountsProvider" Virtualize="true" ItemSize="46"
         GenerateHeader="GenerateHeaderOption.Sticky" TGridItem="AccountDTO">
         <PropertyColumn Title="Name" Property="@(c => c!.Name)" />
         <PropertyColumn Title="Plataform" Property="@(c => c!.CloudStorage.GetDescription())" />
@@ -31,13 +30,12 @@
 @code {
     FluentDataGrid<AccountDTO> grid;
     GridItemsProvider<AccountDTO> accountsProvider = default!;
-    bool _loading = true;
     protected override void OnInitialized()
     {
         _logger = Logger;
-        AccountService.OnAccountCreated += refreshGrid;
-        AccountService.OnAccountUpdated += refreshGrid;
-        AccountService.OnAccountDeleted += refreshGrid;
+        // AccountService.OnAccountCreated += refreshGrid;
+        // AccountService.OnAccountUpdated += refreshGrid;
+        // AccountService.OnAccountDeleted += refreshGrid;
         base.OnInitialized();
     }
 
@@ -52,19 +50,19 @@
         };
     }
 
-    public override void Dispose()
-    {
-        AccountService.OnAccountCreated -= refreshGrid;
-        AccountService.OnAccountUpdated -= refreshGrid;
-        AccountService.OnAccountDeleted -= refreshGrid;
-    }
+    // public override void Dispose()
+    // {
+    //     AccountService.OnAccountCreated -= refreshGrid;
+    //     AccountService.OnAccountUpdated -= refreshGrid;
+    //     AccountService.OnAccountDeleted -= refreshGrid;
+    // }
 
     async Task refreshGrid()
     {
-        _logger.LogInformation("{0} called", nameof(refreshGrid));
-        _loading = true;
+        _logger.Log(LogLevel.Debug, "{0} called", nameof(refreshGrid));
+        grid.SetLoadingState(true);
         await grid!.RefreshDataAsync();
-        _loading = false;
+        grid.SetLoadingState(false);
     }
 
     async Task create()
@@ -73,9 +71,8 @@
             {
                 Width = "70vw",
                 Height = "70vh",
+                OnDialogClosing = EventCallback.Factory.Create<DialogInstance>(this, async (instance) => { await refreshGrid(); })
             });
-
-        await refreshGrid();
     }
 
     async Task edit(AccountDTO account)
@@ -83,7 +80,8 @@
         var dialog = await DialogService.ShowDialogAsync<DialogUpdate>(account, new()
             {
                 Width = "70vw",
-                Height = "70vh",                
+                Height = "70vh",     
+                OnDialogClosing = EventCallback.Factory.Create<DialogInstance>(this, async (instance) => { await refreshGrid(); })
             });
     }
 
@@ -93,6 +91,7 @@
             {
                 Width = "400px",
                 Height = "250px",
+                OnDialogClosing = EventCallback.Factory.Create<DialogInstance>(this, async (instance) => { await refreshGrid(); })
             });
     }
 }

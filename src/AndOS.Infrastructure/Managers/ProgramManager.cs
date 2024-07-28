@@ -3,7 +3,6 @@ using AndOS.Domain.Consts;
 using AndOS.Module.FileExplorer;
 using AndOS.Module.UserConfiguration;
 using Microsoft.Extensions.Logging;
-using Microsoft.JSInterop;
 using System.Reflection;
 using AndOS.Domain.Enums;
 using System.Collections.ObjectModel;
@@ -15,17 +14,17 @@ namespace AndOS.Infrastructure.Managers;
 internal class ProgramManager : IProgramManager
 {
     private readonly ILogger<ProgramManager> _logger;
+    private readonly IAssemblyManager _assemblyManager;
 
-    public ProgramManager(ILogger<ProgramManager> logger, IJSRuntime jsRuntime)
+    public ProgramManager(ILogger<ProgramManager> logger, IAssemblyManager assemblyManager)
     {
         _logger = logger;
-        _jsRuntime = jsRuntime;
+        this._assemblyManager = assemblyManager;
         _programs.Add(new FileExplorerComponent());
         _programs.Add(new NotepadComponent());
         _programs.Add(new UserConfigurationComponent());
     }
 
-    private readonly IJSRuntime _jsRuntime;
     private readonly List<Assembly> _assemblies = [];
     public List<Program> Programs => _programs.ToList();
     ObservableCollection<Program> _programs { get; } = [];
@@ -36,12 +35,12 @@ internal class ProgramManager : IProgramManager
     {
         try
         {
-            List<AssemblyInfo> assemblies = await _jsRuntime.InvokeAsync<List<AssemblyInfo>>(IndexedDbConsts.GetAll, IndexedDbConsts.DbName, IndexedDbConsts.AssemblyStoreIndexedDb);
-            foreach (AssemblyInfo assemblyInfo in assemblies)
+            var assemblies = await _assemblyManager.GetAll();
+            foreach (var assemblyInfo in assemblies)
             {
-                Assembly assembly = Assembly.Load(assemblyInfo.Binary);
+                var assembly = Assembly.Load(assemblyInfo.Binary);
                 await LoadProgramFromAssembly(assembly);
-                _logger.LogInformation($"Assembly loaded: {assemblyInfo.Name}");
+                _logger.Log(LogLevel.Debug, $"Assembly loaded: {assemblyInfo.Name}");
             }
         }
         catch (Exception ex)
@@ -52,32 +51,32 @@ internal class ProgramManager : IProgramManager
 
     public async Task RemoveExternalAssemblyAsync(Assembly assembly)
     {
-        foreach (Program program in _programs.Where(x => x is Program && x.Assembly == assembly)
+        foreach (var program in _programs.Where(x => x is Program && x.Assembly == assembly)
             .ToList())
         {
             _programs.Remove(program);
             await OnUninstall?.Invoke(program);
         }
         _assemblies.Remove(assembly);
-        await RemoveAssemblyOnIndexedDb(assembly);
+        await _assemblyManager.Remove(assembly);
     }
 
     public bool VerifyIfExistsAssembly(Assembly assembly)
     {
-        Assembly assemblyExisting = _assemblies.FirstOrDefault(x => x.GetName().Name == assembly.GetName().Name);
+        var assemblyExisting = _assemblies.Find(x => x.GetName().Name == assembly.GetName().Name);
         return assemblyExisting != null;
     }
 
     public bool VerifyIfExistsAssembly(Assembly assembly, out Assembly assemblyExisting)
     {
-        assemblyExisting = _assemblies.FirstOrDefault(x => x.GetName().Name == assembly.GetName().Name);
+        assemblyExisting = _assemblies.Find(x => x.GetName().Name == assembly.GetName().Name);
         return assemblyExisting != null;
     }
 
     public ResultCompareVersion CheckVersionAssembly(Assembly oldAssembly, Assembly newAssembly)
     {
-        Version versionOldAssembly = oldAssembly.GetName().Version;
-        Version versionNewAssembly = newAssembly.GetName().Version;
+        var versionOldAssembly = oldAssembly.GetName().Version;
+        var versionNewAssembly = newAssembly.GetName().Version;
         if (versionOldAssembly == versionNewAssembly)
             return ResultCompareVersion.Equal;
         else if (versionOldAssembly > versionNewAssembly)
@@ -88,10 +87,10 @@ internal class ProgramManager : IProgramManager
 
     public bool IsValidModule(Assembly assembly)
     {
-        List<AssemblyMetadataAttribute> attributesAssembly = assembly.GetCustomAttributes<AssemblyMetadataAttribute>().ToList();
+        var attributesAssembly = assembly.GetCustomAttributes<AssemblyMetadataAttribute>().ToList();
 
-        string isValidModule = attributesAssembly.FirstOrDefault(a => a.Key.Equals(AssemblyConsts.TagModule))?.Value;
-        _logger.LogInformation(isValidModule?.ToString());
+        var isValidModule = attributesAssembly.Find(a => a.Key.Equals(AssemblyConsts.TagModule))?.Value;
+        _logger.Log(LogLevel.Debug, isValidModule?.ToString());
         return isValidModule == "true";
     }
 
@@ -101,18 +100,18 @@ internal class ProgramManager : IProgramManager
         try
         {
             // Obter todos os tipos no assembly atual
-            Type[] types = assembly.GetTypes();
+            var types = assembly.GetTypes();
             // Filtrar tipos que herdam de Program
-            foreach (Type type in types.Where(t => t.IsAssignableTo(typeof(Program)) && !t.IsAbstract))
+            foreach (var type in types.Where(t => t.IsAssignableTo(typeof(Program)) && !t.IsAbstract))
             {
-                _logger.LogInformation("Name type to instance {0}", type.FullName);
+                _logger.Log(LogLevel.Debug, "Name type to instance {0}", type.FullName);
                 // Instanciar o tipo
                 Program programInstance = (Program)Activator.CreateInstance(type);
                 //programInstance.SetAssembly(assembly);
                 // Adicionar a instância à coleção
                 tempPrograms.Add(programInstance);
             }
-            foreach (Program program in tempPrograms)
+            foreach (var program in tempPrograms)
             {
                 program.IsExternalProgram = true;
                 _programs.Add(program);
@@ -127,39 +126,28 @@ internal class ProgramManager : IProgramManager
         }
         finally
         {
-            _logger.LogInformation("{0} programs loaders from assembly: {1}", _programs.Count, assembly.FullName);
+            _logger.Log(LogLevel.Debug, "{0} programs loaders from assembly: {1}", _programs.Count, assembly.FullName);
         }
     }
 
     public async Task AddExternalProgramAsync(byte[] assemblybinary)
     {
-        Assembly assembly = Assembly.Load(assemblybinary);
+        var assembly = Assembly.Load(assemblybinary);
         await LoadProgramFromAssembly(assembly);
-        await AddAssemblyOnIndexedDb(assembly, assemblybinary);
+        await _assemblyManager.Add(assembly, assemblybinary);
     }
 
     public async Task AddExternalProgramAsync(Assembly assembly)
     {
 
-        byte[] binaryData = File.ReadAllBytes(assembly.Location);
+        var binaryData = File.ReadAllBytes(assembly.Location);
         await AddExternalProgramAsync(binaryData);
     }
 
     public async Task AddExternalProgramAsync(string path)
     {
         FileInfo file = new(path);
-        byte[] binaryData = File.ReadAllBytes(file.FullName);
+        var binaryData = File.ReadAllBytes(file.FullName);
         await AddExternalProgramAsync(binaryData);
-    }
-
-    public async Task AddAssemblyOnIndexedDb(Assembly assembly, byte[] assemblybinary)
-    {
-        AssemblyInfo assemblyInfo = new AssemblyInfo(assembly.GetName().Name, assembly.GetName().Version, assemblybinary);
-        await _jsRuntime.InvokeVoidAsync(IndexedDbConsts.Add, IndexedDbConsts.DbName, IndexedDbConsts.AssemblyStoreIndexedDb, assemblyInfo);
-    }
-
-    public async Task RemoveAssemblyOnIndexedDb(Assembly assembly)
-    {
-        await _jsRuntime.InvokeVoidAsync(IndexedDbConsts.Remove, IndexedDbConsts.DbName, IndexedDbConsts.AssemblyStoreIndexedDb, assembly.GetName().Name);
     }
 }

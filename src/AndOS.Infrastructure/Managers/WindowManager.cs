@@ -74,7 +74,7 @@ internal class WindowManager(ILogger<WindowManager> logger) : IWindowManager
 
     private void internalFocus(Window oldWindow, Window newWindow)
     {
-        _logger.LogInformation("Index old window {0} and new window {1}", oldWindow.Index, newWindow.Index);
+        _logger.Log(LogLevel.Debug, "Index old window {0} and new window {1}", oldWindow.Index, newWindow.Index);
         if (oldWindow.Index > newWindow.Index)
         {
             int tempIndex = oldWindow.Index;

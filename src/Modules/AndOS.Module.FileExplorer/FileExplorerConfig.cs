@@ -11,6 +11,7 @@ public class FileExplorerConfig
     public ModeFileExplorer Mode { get; set; }
     public List<SystemItemBaseComponent> ItemsSelect { get; set; } = [];
     public ItemTypeForSelection ItemToSelect { get; set; } = ItemTypeForSelection.Both;
+    public bool CanOpenFiles { get; set; } = false;
 
     public void OnSingleSelect(SystemItemBaseComponent component, bool value)
     {

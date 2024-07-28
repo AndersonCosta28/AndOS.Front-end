@@ -25,7 +25,7 @@
 
     async Task ClickAsync(Window window)
     {
-        Logger.LogInformation("Clicando no window {0}", window.Id);
+        Logger.Log(LogLevel.Debug, "Clicando no window {0}", window.Id);
         await WindowManager.FocusAsync(window);
     }
 

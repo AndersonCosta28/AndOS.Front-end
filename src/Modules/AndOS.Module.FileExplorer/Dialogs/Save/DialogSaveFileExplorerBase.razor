@@ -56,7 +56,7 @@
 
     protected override void OnInitialized()
     {
-        Logger.LogInformation("Id do arquivo {0}", Content.File.Id);
+        Logger.Log(LogLevel.Debug, "Id do arquivo {0}", Content.File.Id);
 
         Dialog.Instance.Parameters.OnDialogClosing = EventCallback.Factory.Create<DialogInstance>(this, async (DialogInstance instance) =>
         {

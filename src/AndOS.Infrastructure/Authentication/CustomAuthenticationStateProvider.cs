@@ -39,7 +39,7 @@ public class CustomAuthenticationStateProvider(ILocalStorageService localStorage
 
         foreach (Claim claim in jwtToken.Claims)
         {
-            _logger.LogInformation("{0}: {1}", claim.Type, claim.Value);
+            _logger.Log(LogLevel.Debug, "{0}: {1}", claim.Type, claim.Value);
         }
         var identity = new ClaimsIdentity(jwtToken.Claims, "jwt");
         var user = new ClaimsPrincipal(identity);

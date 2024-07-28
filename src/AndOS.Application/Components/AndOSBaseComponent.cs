@@ -1,5 +1,4 @@
-﻿using AndOS.Application.Interfaces;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Logging;
 using Microsoft.FluentUI.AspNetCore.Components;
@@ -20,8 +19,10 @@ public class AndOSBaseComponent : ComponentBase, IAsyncDisposable, IDisposable
     [Inject] protected IFileService FileService { get; init; }
     [Inject] protected IAccountService AccountService { get; init; }
     [Inject] protected IProgramManager ProgramManager { get; init; }
+    [Inject] protected IUserPreferenceService UserPreferenceService { get; init; }
     #endregion
 
+    #region Fields
     public bool Selected { get; set; }
     public string IdElement { get; set; }
     public string ColorOnFocus { get; set; } = "#b8b8f3";
@@ -37,7 +38,9 @@ public class AndOSBaseComponent : ComponentBase, IAsyncDisposable, IDisposable
     protected List<MenuItem> _menuItems = [];
     protected List<Func<Task>> _functionsToRunOnAfterRenderAsync = [];
     protected List<Func<Task>> _functionsToRunOnAfterRender = [];
+    #endregion
 
+    #region refresh functions
     protected virtual Task refreshAsync()
     {
         StateHasChanged();
@@ -49,7 +52,9 @@ public class AndOSBaseComponent : ComponentBase, IAsyncDisposable, IDisposable
         StateHasChanged();
         return Task.CompletedTask;
     }
+    #endregion
 
+    #region Focus or Unfocus functions
     [JSInvokable]
     public void ClickOutSide(bool controlPressed, bool shiftPressed, MouseButton mouseButton) => onClickOutSide(controlPressed, shiftPressed, mouseButton);
 
@@ -62,13 +67,14 @@ public class AndOSBaseComponent : ComponentBase, IAsyncDisposable, IDisposable
         Selected = select;
         StateHasChanged();
     }
+    #endregion
 
     #region life-cycle functions
     public bool EnableLoggingOnInitialized { get; set; } = true;
     protected override void OnInitialized()
     {
         if (EnableLoggingOnInitialized)
-            _logger.LogInformation("Call {0}", nameof(OnInitialized));
+            _logger.Log(LogLevel.Debug, "Call {0}", nameof(OnInitialized));
         base.OnInitialized();
     }
 
@@ -76,7 +82,7 @@ public class AndOSBaseComponent : ComponentBase, IAsyncDisposable, IDisposable
     protected override Task OnInitializedAsync()
     {
         if (EnableLoggingOnInitializedAsync)
-            _logger.LogInformation("Call {0}", nameof(OnInitializedAsync));
+            _logger.Log(LogLevel.Debug, "Call {0}", nameof(OnInitializedAsync));
         return base.OnInitializedAsync();
     }
 
@@ -84,7 +90,7 @@ public class AndOSBaseComponent : ComponentBase, IAsyncDisposable, IDisposable
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (EnableLoggingOnAfterRenderAsync)
-            _logger.LogInformation("Call {0}", nameof(OnAfterRenderAsync));
+            _logger.Log(LogLevel.Debug, "Call {0}", nameof(OnAfterRenderAsync));
         if (firstRender)
             await JSRuntime.InvokeVoidAsync("addClickOutsideListener", _container, DotNetObjectReference.Create(this));
 
@@ -109,7 +115,7 @@ public class AndOSBaseComponent : ComponentBase, IAsyncDisposable, IDisposable
     protected override void OnAfterRender(bool firstRender)
     {
         if (EnableLoggingOnAfterRender)
-            _logger.LogInformation("Call {0}", nameof(OnAfterRender));
+            _logger.Log(LogLevel.Debug, "Call {0}", nameof(OnAfterRender));
         if (_functionsToRunOnAfterRender.Any())
             foreach (var func in _functionsToRunOnAfterRender.ToList())
                 try
@@ -131,14 +137,14 @@ public class AndOSBaseComponent : ComponentBase, IAsyncDisposable, IDisposable
     public virtual void Dispose()
     {
         if (EnableLoggingDispose)
-            _logger.LogInformation("Call {0}", nameof(Dispose));
+            _logger.Log(LogLevel.Debug, "Call {0}", nameof(Dispose));
     }
 
     public bool EnableLoggingDisposeAsync { get; set; } = true;
     public virtual ValueTask DisposeAsync()
     {
         if (EnableLoggingDisposeAsync)
-            _logger.LogInformation("Call {0}", nameof(DisposeAsync));
+            _logger.Log(LogLevel.Debug, "Call {0}", nameof(DisposeAsync));
         return ValueTask.CompletedTask;
     }
     #endregion

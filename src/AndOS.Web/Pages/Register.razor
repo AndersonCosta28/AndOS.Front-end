@@ -1,5 +1,6 @@
-﻿@page "/authentication/register"
+﻿@page "/register"
 @using AndOS.Core.Schemas
+@using AndOS.Domain.Consts
 @using AndOS.Infrastructure.Api
 @using AndOS.Infrastructure.Authentication
 @using System.ComponentModel.DataAnnotations
@@ -68,7 +69,7 @@
 
     private void GoToLogin()
     {
-        NavigationManager.NavigateTo("/authentication/login");
+        NavigationManager.NavigateTo(Routes.Login);
     }
 
     public class RegisterModel

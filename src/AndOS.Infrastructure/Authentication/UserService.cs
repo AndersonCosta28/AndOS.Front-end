@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 namespace AndOS.Infrastructure.Authentication;
 
-public class UserInfo(CustomAuthenticationStateProvider authenticationStateProvider) : IUserInfo
+public class UserService(CustomAuthenticationStateProvider authenticationStateProvider) : IUserService
 {
     public async Task<string> GetUserNameAsync()
     {

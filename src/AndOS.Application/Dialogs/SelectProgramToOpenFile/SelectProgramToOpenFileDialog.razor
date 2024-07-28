@@ -1,0 +1,48 @@
+﻿@implements IDialogContentComponent<SelectProgramToOpenFileParams>
+@inject IProgramManager ProgramManager
+@inject IUserPreferenceService UserPreferenceService
+@namespace AndOS.Application.Dialogs.SelectProgramToOpenFile
+@using AndOS.Shared.Requests.UserPreferences.Update
+<FluentDialogHeader>
+    <FluentLabel Typo="Typography.PaneHeader">Select program to open fle</FluentLabel>
+</FluentDialogHeader>
+<FluentDialogBody>
+    <FluentListbox TOption="Program" Items="programs" @bind-SelectedOption=@Program>
+        <OptionTemplate>
+            @context.Icon
+            @context.Name
+        </OptionTemplate>
+    </FluentListbox>
+    <p>
+        Selected item: @Program?.Name
+    </p>
+</FluentDialogBody>
+<FluentDialogFooter>
+    <FluentCheckbox @bind-Value=SetDefaultProgram Label="Set as default program for this extension?" />
+    <FluentButton OnClick="Open">Open</FluentButton>
+</FluentDialogFooter>
+@code {
+    public bool SetDefaultProgram { get; set; }
+    public Program Program { get; set; }
+    [Parameter] public SelectProgramToOpenFileParams Content { get; set; }
+    [CascadingParameter] public FluentDialog Dialog { get; set; }
+
+    List<Program> programs { get; set; } = [];
+
+    protected override void OnInitialized()
+    {
+        programs = ProgramManager.Programs.Where(x => x.Extensions.Contains(Content.Extension))
+                                          .ToList();
+    }
+
+    async Task Open(MouseEventArgs @event)
+    {
+        if (SetDefaultProgram)
+        {
+            var defaultProgram = new DefaultProgramToExtensionDTO(this.Content.Extension, Program.Name);
+            var request = new UpdateDefaultProgramsToExtensionRequest(new([defaultProgram]));
+            await UserPreferenceService.UpdateDefaultProgramToExtensionAsync(request);
+        }
+        await this.Dialog.CloseAsync(Program);
+    }
+}

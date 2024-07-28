@@ -4,7 +4,7 @@
 @using AndOS.Infrastructure.Api
 @using AndOS.Infrastructure.Authentication
 @using AndOS.Module.UserConfiguration
-@inject IUserInfo UserInfo
+@inject IUserService UserInfo
 @inject NavigationManager NavigationManager
 @inject AuthenticationService AuthService
 @inject IWindowManager WindowManager
@@ -21,9 +21,9 @@
                            Initials="@nickName[0].ToString().ToUpper()"
                            FullName="@nickName"
                            EMail="@userEmail"
-                           Style="min-width: 330px;"
+                           Style="min-width: 330px; justify-content: end"
                            OnHeaderButtonClick="@AuthService.Logout",
-                           OnFooterLinkClick="@OpenUserConfiguration"/>
+                           OnFooterLinkClick="@OpenUserConfiguration" />
     </FluentStack>
 </FluentStack>
 
