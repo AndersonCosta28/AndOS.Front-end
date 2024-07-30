@@ -1,5 +1,4 @@
-﻿using AndOS.Application.Dialogs.SelectProgramToOpenFile;
-using AndOS.Application.Extensions;
+﻿using AndOS.Application.Extensions;
 using AndOS.Application.Interfaces;
 using AndOS.Shared.DTOs;
 using AndOS.Shared.Requests.Files.Create;

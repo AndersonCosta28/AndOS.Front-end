@@ -8,8 +8,8 @@ using System.Security.Claims;
 
 namespace AndOS.Infrastructure.Authentication;
 
-public class CustomAuthenticationStateProvider(ILocalStorageService localStorage, 
-    HttpClient httpClient, 
+public class CustomAuthenticationStateProvider(ILocalStorageService localStorage,
+    HttpClient httpClient,
     ILogger<CustomAuthenticationStateProvider> logger,
     NavigationManager navigationManager) : AuthenticationStateProvider
 {

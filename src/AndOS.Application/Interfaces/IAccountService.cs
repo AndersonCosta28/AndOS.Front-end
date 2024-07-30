@@ -1,11 +1,9 @@
-﻿using AndOS.Shared.DTOs;
-using AndOS.Shared.Requests.Accounts.Create;
+﻿using AndOS.Shared.Requests.Accounts.Create;
 using AndOS.Shared.Requests.Accounts.Delete;
-using AndOS.Shared.Requests.Accounts.Get.GetById;
 using AndOS.Shared.Requests.Accounts.Get.GetAll;
-using AndOS.Shared.Requests.Accounts.Update;
+using AndOS.Shared.Requests.Accounts.Get.GetById;
 using AndOS.Shared.Requests.Accounts.Get.GetConfigByAccountId;
-using System.Text.Json;
+using AndOS.Shared.Requests.Accounts.Update;
 
 namespace AndOS.Application.Interfaces;
 

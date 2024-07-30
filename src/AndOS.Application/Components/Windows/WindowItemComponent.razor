@@ -128,8 +128,8 @@ else
     {
         _logger = Logger;
 
-        WindowManager.OnFocus += RefreshOnFocus;
-        WindowManager.OnHide += RefreshOnHide;
+        ProcessManager.OnWindowFocus += RefreshOnFocus;
+        ProcessManager.OnWindowHide += RefreshOnHide;
         ProgramManager.OnUninstall += OnUninstall;
         ProgramManager.OnInstall += OnInstall;
         base.OnInitialized();
@@ -158,8 +158,8 @@ else
 
     public override void Dispose()
     {
-        WindowManager.OnFocus -= RefreshOnFocus;
-        WindowManager.OnHide -= RefreshOnHide;
+        ProcessManager.OnWindowFocus -= RefreshOnFocus;
+        ProcessManager.OnWindowHide -= RefreshOnHide;
         ProgramManager.OnUninstall -= OnUninstall;
         ProgramManager.OnInstall -= OnInstall;
     }
@@ -260,7 +260,7 @@ else
 
     async Task Hide()
     {
-        await WindowManager.HideAsync(this.Content.Window);
+        await ProcessManager.HideWindowAsync(this.Content.Window);
         StateHasChanged();
     }
 
@@ -281,7 +281,7 @@ else
     {
         if (this.Content.Window.Focused)
             return;
-        await WindowManager.FocusAsync(this.Content.Window);
+        await ProcessManager.FocusWindowAsync(this.Content.Window);
     }
 
     [JSInvokable]

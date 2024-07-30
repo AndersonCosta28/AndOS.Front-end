@@ -9,7 +9,6 @@ internal static class ManagerServiceCollection
     {
         services.AddSingleton<IProgramManager, ProgramManager>();
         services.AddSingleton<IContextMenuManager, ContextMenuManager>();
-        services.AddSingleton<IWindowManager, WindowManager>();
         services.AddSingleton<IProcessManager, ProcessManager>();
         services.AddSingleton<IAssemblyManager, IndexDbAssemblyManager>();
         return services;

@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
-
-namespace AndOS.Application.Entities;
+﻿namespace AndOS.Application.Entities;
 
 public class Window
 {

@@ -9,7 +9,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FluentUI.AspNetCore.Components;
 using Polly;
-using Microsoft.Extensions.Http.Resilience;
 using Polly.Retry;
 
 namespace AndOS.Infrastructure;

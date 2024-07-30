@@ -1,9 +1,7 @@
-﻿using AndOS.Shared.DTOs;
-using AndOS.Shared.Requests.Folders.Create;
+﻿using AndOS.Shared.Requests.Folders.Create;
 using AndOS.Shared.Requests.Folders.Delete;
 using AndOS.Shared.Requests.Folders.Get.GetById;
 using AndOS.Shared.Requests.Folders.Get.GetByPath;
-using AndOS.Shared.Requests.Folders.Update;
 using AndOS.Shared.Requests.Folders.Update.Rename;
 
 namespace AndOS.Application.Interfaces;

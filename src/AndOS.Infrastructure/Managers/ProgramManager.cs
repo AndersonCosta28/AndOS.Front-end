@@ -1,13 +1,13 @@
-﻿using AndOS.Module.Notepad;
+﻿using AndOS.Application.Entities;
+using AndOS.Application.Interfaces;
 using AndOS.Domain.Consts;
+using AndOS.Domain.Enums;
 using AndOS.Module.FileExplorer;
+using AndOS.Module.Notepad;
 using AndOS.Module.UserConfiguration;
 using Microsoft.Extensions.Logging;
-using System.Reflection;
-using AndOS.Domain.Enums;
 using System.Collections.ObjectModel;
-using AndOS.Application.Interfaces;
-using AndOS.Application.Entities;
+using System.Reflection;
 
 namespace AndOS.Infrastructure.Managers;
 

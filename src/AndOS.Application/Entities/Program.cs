@@ -5,12 +5,12 @@ namespace AndOS.Application.Entities;
 
 public class Program : AndOSBaseComponent
 {
-    public Guid Id { get; set; } =  Guid.NewGuid();
+    public Guid Id { get; set; } = Guid.NewGuid();
     public RenderFragment Icon { get; set; }
     public string Name { get; set; }
     public bool IsExternalProgram { get; set; }
     public bool CanMinimizeToTray { get; set; }
-    public bool InstantiateWindowOnOpen { get; set; }
+    public bool InstantiateWindowOnOpen { get; set; } = true;
     public bool AllowMultipleInstances { get; set; }
     public Assembly Assembly { get; set; }
     [Parameter] public Dictionary<string, object> Arguments { get; set; } = [];

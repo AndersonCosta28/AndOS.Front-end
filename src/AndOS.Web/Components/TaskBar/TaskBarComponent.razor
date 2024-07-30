@@ -5,7 +5,7 @@
 @namespace AndOS.Web.Components.TaskBar
 @inject ILogger<TaskBarComponent> Logger
 
-@if (WindowManager.Windows.Count > 0)
+@if (ProcessManager.Processes.Exists(x => x.Window is not null))
 {
     <div id=@IdElement>
         <div id="taskbar_container_content">
@@ -23,19 +23,19 @@
         _logger = Logger;
         IdElement = "taskbar_container";
 
-        WindowManager.OnOpen += refreshAsync;
-        WindowManager.OnClose += refreshAsync;
-        WindowManager.OnFocus += refreshAsync;
-        WindowManager.OnHide += refreshAsync;
+        ProcessManager.OnWindowOpen += refreshAsync;
+        ProcessManager.OnWindowClose += refreshAsync;
+        ProcessManager.OnWindowFocus += refreshAsync;
+        ProcessManager.OnWindowHide += refreshAsync;
         base.OnInitialized();
     }
 
     public override void Dispose()
     {
-        WindowManager.OnOpen -= refreshAsync;
-        WindowManager.OnClose -= refreshAsync;
-        WindowManager.OnFocus -= refreshAsync;
-        WindowManager.OnHide -= refreshAsync;
+        ProcessManager.OnWindowOpen -= refreshAsync;
+        ProcessManager.OnWindowClose -= refreshAsync;
+        ProcessManager.OnWindowFocus -= refreshAsync;
+        ProcessManager.OnWindowHide -= refreshAsync;
         base.Dispose();
     }
 }

@@ -13,7 +13,6 @@ public class AndOSBaseComponent : ComponentBase, IAsyncDisposable, IDisposable
     [Inject] protected IDialogService DialogService { get; init; }
     [Inject] protected IToastService ToastService { get; init; }
     [Inject] protected HttpClient HttpClient { get; init; }
-    [Inject] protected IWindowManager WindowManager { get; init; }
     [Inject] protected IProcessManager ProcessManager { get; init; }
     [Inject] protected IFolderService FolderService { get; init; }
     [Inject] protected IFileService FileService { get; init; }

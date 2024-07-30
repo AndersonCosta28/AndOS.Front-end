@@ -8,7 +8,6 @@ using AndOS.Shared.Requests.Accounts.Get.GetById;
 using AndOS.Shared.Requests.Accounts.Get.GetConfigByAccountId;
 using AndOS.Shared.Requests.Accounts.Update;
 using System.Net.Http.Json;
-using System.Text.Json;
 
 namespace AndOS.Infrastructure.Api;
 
