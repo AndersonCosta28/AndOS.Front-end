@@ -34,7 +34,7 @@
     protected override void OnInitialized()
     {
         _logger = Logger;
-        MenuItem menuItemOpen = new("Open", OpenAsync, callBackDisabled: () => Task.FromResult(FileExplorerConfig.CanOpenFiles));
+        MenuItem menuItemOpen = new("Open", OpenAsync, callBackDisabled: () => Task.FromResult(!FileExplorerConfig.CanOpenFiles));
         MenuItem menuItemRename = new("Rename", RenameAsync);
         MenuItem menuItemDelete = new("Delete", DeleteAsync);
         MenuItem menuItemProperties = new("Properties", PropertiesAsync);

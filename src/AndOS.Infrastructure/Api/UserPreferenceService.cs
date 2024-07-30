@@ -31,7 +31,7 @@ public class UserPreferenceService(HttpClient httpClient) : IUserPreferenceServi
 
     public async Task<GetDefaultProgramByExtensionResponse> GetDefaultProgramByExtensionAsync(GetDefaultProgramByExtensionRequest request, CancellationToken cancellationToken = default)
     {
-        var response = await httpClient.GetAsync($"userpreferences/GetDefaultProgramByExtension", cancellationToken);
+        var response = await httpClient.GetAsync($"userpreferences/GetDefaultProgramByExtension?Extension={request.Extension}", cancellationToken);
         await response.HandleResponse(cancellationToken);
         return await response.Content.ReadFromJsonAsync<GetDefaultProgramByExtensionResponse>(cancellationToken = default);
     }

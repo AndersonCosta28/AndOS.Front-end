@@ -1,7 +1,4 @@
-﻿using AndOS.Application.Entities;
-using System.Collections.ObjectModel;
-
-namespace AndOS.Application.Interfaces;
+﻿namespace AndOS.Application.Interfaces;
 
 public interface IProcessManager
 {
@@ -9,7 +6,6 @@ public interface IProcessManager
 
     Task<Process> StartAsync(Program program);
     Task EndAsync(Process process);
-
     Task MinimizeToTray(Process process);
     Task RestoreFromTray(Process process);
 }
