@@ -25,8 +25,8 @@
 
     async Task ClickAsync(Window window)
     {
-        Logger.LogInformation("Clicando no window {0}", window.Id);
-        await WindowManager.FocusAsync(window);
+        Logger.Log(LogLevel.Debug, "Clicando no window {0}", window.Id);
+        await ProcessManager.FocusWindowAsync(window);
     }
 
     async Task TooglerAsync()    
@@ -44,12 +44,12 @@
 
     async Task ShowAsync()
     {
-        await WindowManager.FocusAsync(this.Process.Window);
+        await ProcessManager.FocusWindowAsync(this.Process.Window);
     }
 
     async Task HideAsync()
     {
-        await WindowManager.HideAsync(this.Process.Window);
+        await ProcessManager.HideWindowAsync(this.Process.Window);
     }
 
     protected override async Task ShowMenuItemsAsync(MouseEventArgs args)

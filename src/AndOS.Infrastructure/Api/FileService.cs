@@ -16,13 +16,9 @@ namespace AndOS.Infrastructure.Api;
 internal class FileService(HttpClient httpClient,
     ILogger<FileService> logger,
     ICloudStorageServiceFactory cloudStorageServiceFactory,
-    IToastService toastService) : IFileService
+    IToastService toastService,
+    IDialogService dialogService) : IFileService
 {
-    private readonly HttpClient _httpClient = httpClient;
-    private readonly ILogger<FileService> _logger = logger;
-    private readonly ICloudStorageServiceFactory _cloudStorageServiceFactory = cloudStorageServiceFactory;
-    private readonly IToastService _toastService = toastService;
-
     public event Func<Task> OnFileCreated;
     public event Func<Task> OnFileUpdated;
     public event Func<Task> OnFileDeleted;
@@ -30,7 +26,7 @@ internal class FileService(HttpClient httpClient,
 
     public async Task<CreateFileResponse> CreateAsync(CreateFileRequest request, CancellationToken cancellationToken = default)
     {
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{_endpoint}", request, cancellationToken: cancellationToken);
+        var response = await httpClient.PostAsJsonAsync($"{_endpoint}", request, cancellationToken: cancellationToken);
         await response.HandleResponse(cancellationToken);
         if (OnFileCreated != null)
             await OnFileCreated?.Invoke();
@@ -40,7 +36,7 @@ internal class FileService(HttpClient httpClient,
 
     public async Task<UpdateContentFileResponse> UpdateContentFileAsync(UpdateContentFileRequest request, CancellationToken cancellationToken = default)
     {
-        HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"{_endpoint}/UpdateContent", request, cancellationToken: cancellationToken);
+        var response = await httpClient.PutAsJsonAsync($"{_endpoint}/UpdateContent", request, cancellationToken: cancellationToken);
         await response.HandleResponse(cancellationToken);
         if (OnFileUpdated != null)
             await OnFileUpdated?.Invoke();
@@ -50,7 +46,7 @@ internal class FileService(HttpClient httpClient,
 
     public async Task RenameAsync(RenameFileRequest request, CancellationToken cancellationToken = default)
     {
-        HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"{_endpoint}/rename", request, cancellationToken: cancellationToken);
+        var response = await httpClient.PutAsJsonAsync($"{_endpoint}/rename", request, cancellationToken: cancellationToken);
         await response.HandleResponse(cancellationToken);
         if (OnFileUpdated != null)
             await OnFileUpdated?.Invoke();
@@ -58,7 +54,7 @@ internal class FileService(HttpClient httpClient,
 
     public async Task DeleteAsync(DeleteFileRequest request, CancellationToken cancellationToken = default)
     {
-        HttpResponseMessage response = await _httpClient.DeleteAsync($"{_endpoint}?{request.ToQueryString()}", cancellationToken);
+        var response = await httpClient.DeleteAsync($"{_endpoint}?{request.ToQueryString()}", cancellationToken);
         await response.HandleResponse(cancellationToken);
         if (OnFileDeleted != null)
             await OnFileDeleted?.Invoke();
@@ -66,7 +62,7 @@ internal class FileService(HttpClient httpClient,
 
     public async Task<GetFileByIdResponse> GetByIdAsync(GetFileByIdRequest request, CancellationToken cancellationToken = default)
     {
-        HttpResponseMessage response = await _httpClient.GetAsync($"{_endpoint}/GetById?{request.ToQueryString()}", cancellationToken);
+        var response = await httpClient.GetAsync($"{_endpoint}/GetById?{request.ToQueryString()}", cancellationToken);
         await response.HandleResponse(cancellationToken);
         var result = await response.Content.ReadFromJsonAsync<GetFileByIdResponse>(cancellationToken: cancellationToken);
         return result;
@@ -74,7 +70,7 @@ internal class FileService(HttpClient httpClient,
 
     public async Task<GetFileByPathResponse> GetByPathAsync(GetFileByPathRequest request, CancellationToken cancellationToken = default)
     {
-        HttpResponseMessage response = await _httpClient.GetAsync($"{_endpoint}/GetByPath?{request.ToQueryString()}", cancellationToken);
+        var response = await httpClient.GetAsync($"{_endpoint}/GetByPath?{request.ToQueryString()}", cancellationToken);
         await response.HandleResponse(cancellationToken);
         var result = await response.Content.ReadFromJsonAsync<GetFileByPathResponse>(cancellationToken: cancellationToken);
         return result;
@@ -96,14 +92,14 @@ internal class FileService(HttpClient httpClient,
                 url = response.Url;
             }
 
-            ICloudStorageService service = _cloudStorageServiceFactory.Create(cloudStorage);
+            var service = cloudStorageServiceFactory.Create(cloudStorage);
             await service.UploadAsync(url, content, cancellationToken);
-            _toastService.ShowSuccess("File saved successfully");
+            toastService.ShowSuccess("File saved successfully");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, null);
-            _toastService.ShowError(ex.Message);
+            logger.LogError(ex, null);
+            toastService.ShowError(ex.Message);
         }
     }
 }

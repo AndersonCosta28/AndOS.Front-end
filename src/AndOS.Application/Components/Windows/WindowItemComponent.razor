@@ -102,8 +102,8 @@ else
 
         _removeListenersFunctionId = await JSRuntime.InvokeAsync<string>("draggableFunctions.startDrag", _container,
         _headerLeftReference, _objectReference);
-        Logger.LogInformation("result: {0}", _removeListenersFunctionId);
-        Logger.LogInformation(nameof(AttachDraggable));
+        Logger.Log(LogLevel.Debug,"result: {0}", _removeListenersFunctionId);
+        Logger.Log(LogLevel.Debug, nameof(AttachDraggable));
     }
 
     async Task UnattachDraggable()
@@ -113,7 +113,7 @@ else
 
         await JSRuntime.InvokeVoidAsync("draggableFunctions.removeListeners", _removeListenersFunctionId);
         _removeListenersFunctionId = string.Empty;
-        Logger.LogInformation(nameof(UnattachDraggable));
+        Logger.Log(LogLevel.Debug, nameof(UnattachDraggable));
     }
 
     public void UpdateTitle(string title)
@@ -128,8 +128,8 @@ else
     {
         _logger = Logger;
 
-        WindowManager.OnFocus += RefreshOnFocus;
-        WindowManager.OnHide += RefreshOnHide;
+        ProcessManager.OnWindowFocus += RefreshOnFocus;
+        ProcessManager.OnWindowHide += RefreshOnHide;
         ProgramManager.OnUninstall += OnUninstall;
         ProgramManager.OnInstall += OnInstall;
         base.OnInitialized();
@@ -158,8 +158,8 @@ else
 
     public override void Dispose()
     {
-        WindowManager.OnFocus -= RefreshOnFocus;
-        WindowManager.OnHide -= RefreshOnHide;
+        ProcessManager.OnWindowFocus -= RefreshOnFocus;
+        ProcessManager.OnWindowHide -= RefreshOnHide;
         ProgramManager.OnUninstall -= OnUninstall;
         ProgramManager.OnInstall -= OnInstall;
     }
@@ -260,7 +260,7 @@ else
 
     async Task Hide()
     {
-        await WindowManager.HideAsync(this.Content.Window);
+        await ProcessManager.HideWindowAsync(this.Content.Window);
         StateHasChanged();
     }
 
@@ -281,20 +281,20 @@ else
     {
         if (this.Content.Window.Focused)
             return;
-        await WindowManager.FocusAsync(this.Content.Window);
+        await ProcessManager.FocusWindowAsync(this.Content.Window);
     }
 
     [JSInvokable]
     public void OnResize(string widthInPx, string heightInPx)
     {
-        Logger.LogInformation("Redimensionando...");
+        Logger.Log(LogLevel.Debug, "Redimensionando...");
         (Content.Window.Width, Content.Window.Height) = (widthInPx, heightInPx);
     }
 
     [JSInvokable]
     public void OnDrag(string left, string top)
     {
-        Logger.LogInformation("Arrastando...");
+        Logger.Log(LogLevel.Debug, "Arrastando...");
         (Content.Window.Left, Content.Window.Top) = (left, top);
     }
     #endregion

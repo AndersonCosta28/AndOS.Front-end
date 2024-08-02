@@ -11,6 +11,7 @@ internal static class ApiServiceCollection
         services.AddScoped<IFileService, FileService>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<AuthenticationService>();
+        services.AddScoped<IUserPreferenceService, UserPreferenceService>();
         return services;
     }
 }

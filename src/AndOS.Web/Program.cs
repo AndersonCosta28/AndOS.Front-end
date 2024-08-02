@@ -3,15 +3,14 @@ using AndOS.Web;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
-WebAssemblyHostBuilder builder = WebAssemblyHostBuilder.CreateDefault(args);
+var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 // Adiciona o arquivo de configuração appsettings.json
-Console.WriteLine(builder.HostEnvironment.Environment);
 builder.Configuration.AddJsonFile("appsettings.json", false, true)
                         .AddJsonFile($"appsettings.{builder.HostEnvironment.Environment}.json");
 
 // Configurações adicionais
-WebAssemblyHostConfiguration configuration = builder.Configuration;
+var configuration = builder.Configuration;
 
 // Adiciona serviços de infraestrutura
 builder.Services.AddInfrastructureServices(configuration);

@@ -11,7 +11,7 @@ internal static class AuthenticationServiceCollection
         services.AddAuthorizationCore();
         services.AddScoped<CustomAuthenticationStateProvider>();
         services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<CustomAuthenticationStateProvider>());
-        services.AddScoped<IUserInfo, UserInfo>();
+        services.AddScoped<IUserService, UserService>();
         return services;
     }
 }

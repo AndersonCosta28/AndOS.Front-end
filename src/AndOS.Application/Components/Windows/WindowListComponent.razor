@@ -1,10 +1,9 @@
-﻿@inject IWindowManager WindowManager
-@inject IProcessManager ProcessManager
+﻿@inject IProcessManager ProcessManager
 @inject ILogger<WindowListComponent> Logger
 @implements IDisposable
 @namespace AndOS.Application.Components.Windows
 
-@foreach (var process in ProcessManager.Processes)
+@foreach (var process in ProcessManager.Processes.Where(x => x.Window is not null))
 {
     <WindowItemComponent Content="process" @key=process />
 }
@@ -12,16 +11,16 @@
 @code {
     protected override void OnInitialized()
     {
-        WindowManager.OnOpen += Refresh;
-        WindowManager.OnClose += Refresh;
-        WindowManager.OnFocus += Refresh;
+        ProcessManager.OnWindowOpen += Refresh;
+        ProcessManager.OnWindowClose += Refresh;
+        ProcessManager.OnWindowFocus += Refresh;
     }
 
     public void Dispose()
     {
-        WindowManager.OnOpen -= Refresh;
-        WindowManager.OnClose -= Refresh;
-        WindowManager.OnFocus -= Refresh;
+        ProcessManager.OnWindowOpen -= Refresh;
+        ProcessManager.OnWindowClose -= Refresh;
+        ProcessManager.OnWindowFocus -= Refresh;
     }
 
     Task Refresh(Window window)

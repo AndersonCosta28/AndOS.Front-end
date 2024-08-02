@@ -1,13 +1,11 @@
 ﻿using AndOS.Application.Extensions;
 using AndOS.Application.Interfaces;
-using AndOS.Shared.DTOs;
 using AndOS.Shared.Requests.Folders.Create;
 using AndOS.Shared.Requests.Folders.Delete;
 using AndOS.Shared.Requests.Folders.Get.GetById;
 using AndOS.Shared.Requests.Folders.Get.GetByPath;
 using AndOS.Shared.Requests.Folders.Update.Rename;
 using System.Net.Http.Json;
-using System.Threading;
 
 namespace AndOS.Infrastructure.Api;
 

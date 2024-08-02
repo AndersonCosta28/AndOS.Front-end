@@ -1,4 +1,5 @@
-﻿@page "/authentication/login"
+﻿@page "/login"
+@using AndOS.Domain.Consts
 @using AndOS.Infrastructure.Api
 @using AndOS.Infrastructure.Authentication
 @namespace AndOS.Web.Pages.Login
@@ -26,7 +27,7 @@
 
     private void GoToRegister()
     {
-        NavigationManager.NavigateTo("/authentication/register");
+        NavigationManager.NavigateTo(Routes.Register);
     }
 
     private async Task HandleValidSubmit()

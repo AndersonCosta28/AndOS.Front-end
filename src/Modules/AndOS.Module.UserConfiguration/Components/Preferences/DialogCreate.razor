@@ -1,0 +1,62 @@
+﻿@using AndOS.Core.Enums
+@using AndOS.Core.Schemas
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.FluentUI.AspNetCore.Components.Extensions
+@using System.Text.Json
+@inject ILogger<DialogCreate> Logger
+@inject IDialogService IDialogService
+@inject IToastService ToastService
+@inject IProgramManager ProgramManager
+@inject IUserPreferenceService UserPreferenceService
+@implements IDialogContentComponent
+@namespace AndOS.Module.UserConfiguration.Preferences
+
+<FluentDialogHeader>
+    <FluentLabel Typo="Typography.H2">Link a program to an extension</FluentLabel>
+</FluentDialogHeader>
+
+<FluentDialogBody Style="overflow: auto;">
+    <FluentStack Orientation="Orientation.Vertical">
+        <FluentTextField @bind-Value=@Extension Name="Extension" Label="Extension" Pattern="@FileSchema.RegexExtension"
+                         Minlength="@FileSchema.MinLenghtName" Maxlength="@FileSchema.MaxLenghtName" Style="width: 50%" />
+        <FluentSelect Label="Program" TOption=Program Items="ProgramManager.Programs"
+                      OptionText="@(v => v.Name)" OptionValue="@(v => v.Name)"
+                      @bind-SelectedOption=@Program />
+    </FluentStack>
+</FluentDialogBody>
+
+<FluentDialogFooter>
+    <FluentStack VerticalAlignment="VerticalAlignment.Center" HorizontalAlignment="HorizontalAlignment.Center">
+        <FluentButton Loading=_loading Type="ButtonType.Submit" Appearance="Appearance.Accent" OnClick=Submit>
+            Save
+        </FluentButton>
+    </FluentStack>
+</FluentDialogFooter>
+
+@code {
+    public string Extension { get; set; }
+    public Program Program { get; set; }
+    [CascadingParameter] public FluentDialog Dialog { get; set; } = default!;
+    bool _loading { get; set; } = false;
+
+    async Task Submit()
+    {
+        try
+        {
+            _loading = true;
+
+            DefaultProgramToExtensionDTO defaultProgram = new(Extension, Program.Name);
+            await UserPreferenceService.UpdateDefaultProgramToExtensionAsync(new([defaultProgram]));
+            await Dialog.CloseAsync();
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, e.Message);
+            ToastService.ShowError("Error Link a program to an extension:\n" + e.Message);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

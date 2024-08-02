@@ -1,6 +1,6 @@
 ﻿namespace AndOS.Application.Interfaces;
 
-public interface IUserInfo
+public interface IUserService : IService
 {
     Task<string> GetUserNameAsync();
 
