@@ -11,17 +11,7 @@
 <p>took @_seconds seconds to complete the request</p>
 @code {
     int _seconds;
-    public ExampleComponent() : base()
-    {
-        Name = "Example";
-        Icon = builder =>
-        {
-            builder.OpenComponent<BlazorBootstrap.Icon>(0);
-            builder.AddAttribute(1, "Name", BlazorBootstrap.IconName.QuestionCircle); // Substitua pelo ícone desejado
-            builder.AddAttribute(2, "style", "width: inherit; font-size: inherit;");
-            builder.CloseComponent();
-        };
-    }
+
     protected override async Task OnInitializedAsync()
     {
         var rand = new Random();

@@ -21,22 +21,8 @@
     [Parameter] public FileDTO Content { get; set; } = new() { };
     public CloudStorage CurrentCloudStorage { get; set; }
     public bool LineBreak { get; set; }
-
+    Dictionary<string, object> currentArgs = [];
     private string text = "";
-
-    public NotepadComponent()
-    {
-        Name = "Notepad";
-        AllowMultipleInstances = true;
-        Icon = builder =>
-        {
-            builder.OpenComponent<BlazorBootstrap.Icon>(0);
-            builder.AddAttribute(1, "Name", BlazorBootstrap.IconName.JournalText); // Substitua pelo ícone desejado
-            builder.AddAttribute(2, "style", "width: inherit; font-size: inherit;");
-            builder.CloseComponent();
-        };
-        Extensions = ["txt", "*"];
-    }
 
     protected override void OnInitialized()
     {
@@ -57,26 +43,38 @@
         base.OnInitialized();
     }
 
-    public override Task SetParametersAsync(ParameterView parameters)
-    {
-        return base.SetParametersAsync(parameters);
-    }
-
     protected override async Task OnInitializedAsync()
     {
+        await CheckFileIdOnArguments();
+        await base.OnInitializedAsync();
+        currentArgs = Arguments;
+    }
+
+    protected override async Task OnUpdateArguments(Dictionary<string, object> arguments)
+    {
+        await CheckFileIdOnArguments();
+    }
+
+    async Task CheckFileIdOnArguments()
+    {
+        Guid fileId = Guid.Empty;
+        if (Arguments == null)
+            return;
         if (Arguments.TryGetValue("FileId", out var obj) && obj is string or Guid)
         {
-            Guid fileId = Guid.Empty;
             if (obj is string str && Guid.TryParse(str, out var result))
                 fileId = result;
             else if (obj is Guid)
                 fileId = (Guid)obj;
             else return;
-
-            await OpenAsync(fileId);
         }
-        await base.OnInitializedAsync();
+
+        if (fileId == Content.Id)
+            return;
+
+        await OpenAsync(fileId);
     }
+
 
     async Task SaveAsync()
     {
@@ -108,7 +106,7 @@
         {
             var service = CloudStorageServiceFactory.Create(response.CloudStorage);
             text = await service.DownloadAsync(response.Url);
-            UpdateTitle($"{Name} - {response.Name}");
+            UpdateTitle($"{this.Program.Name} - {response.Name}");
             StateHasChanged();
         }
         catch (Exception ex)
@@ -124,5 +122,10 @@
         LineBreak = !LineBreak;
         StateHasChanged();
         return Task.CompletedTask;
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
     }
 }

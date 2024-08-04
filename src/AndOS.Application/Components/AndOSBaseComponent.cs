@@ -140,6 +140,7 @@ public class AndOSBaseComponent : ComponentBase, IAsyncDisposable, IDisposable
     }
 
     public bool EnableLoggingDisposeAsync { get; set; } = true;
+
     public virtual ValueTask DisposeAsync()
     {
         if (EnableLoggingDisposeAsync)

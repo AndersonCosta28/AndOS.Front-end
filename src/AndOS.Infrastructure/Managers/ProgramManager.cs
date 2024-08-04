@@ -1,13 +1,10 @@
-﻿using AndOS.Application.Entities;
-using AndOS.Application.Interfaces;
-using AndOS.Domain.Consts;
+﻿using AndOS.Domain.Consts;
 using AndOS.Domain.Enums;
 using AndOS.Module.FileExplorer;
 using AndOS.Module.Notepad;
 using AndOS.Module.UserConfiguration;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
-using System.Reflection;
 
 namespace AndOS.Infrastructure.Managers;
 
@@ -20,9 +17,9 @@ internal class ProgramManager : IProgramManager
     {
         _logger = logger;
         this._assemblyManager = assemblyManager;
-        _programs.Add(new FileExplorerComponent());
-        _programs.Add(new NotepadComponent());
-        _programs.Add(new UserConfigurationComponent());
+        _programs.Add(new FileExplorer());
+        _programs.Add(new Notepad());
+        _programs.Add(new UserConfiguration());
     }
 
     private readonly List<Assembly> _assemblies = [];
@@ -105,10 +102,7 @@ internal class ProgramManager : IProgramManager
             foreach (var type in types.Where(t => t.IsAssignableTo(typeof(Program)) && !t.IsAbstract))
             {
                 _logger.Log(LogLevel.Debug, "Name type to instance {0}", type.FullName);
-                // Instanciar o tipo
-                Program programInstance = (Program)Activator.CreateInstance(type);
-                //programInstance.SetAssembly(assembly);
-                // Adicionar a instância à coleção
+                var programInstance = (Program)Activator.CreateInstance(type);
                 tempPrograms.Add(programInstance);
             }
             foreach (var program in tempPrograms)

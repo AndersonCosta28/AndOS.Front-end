@@ -23,19 +23,19 @@
         _logger = Logger;
         IdElement = "taskbar_container";
 
-        ProcessManager.OnWindowOpen += refreshAsync;
-        ProcessManager.OnWindowClose += refreshAsync;
-        ProcessManager.OnWindowFocus += refreshAsync;
-        ProcessManager.OnWindowHide += refreshAsync;
+        ProcessManager.OnWindowOpenAsync += refreshAsync;
+        ProcessManager.OnWindowCloseAsync += refreshAsync;
+        ProcessManager.OnWindowFocusAsync += refreshAsync;
+        ProcessManager.OnWindowHideAsync += refreshAsync;
         base.OnInitialized();
     }
 
     public override void Dispose()
     {
-        ProcessManager.OnWindowOpen -= refreshAsync;
-        ProcessManager.OnWindowClose -= refreshAsync;
-        ProcessManager.OnWindowFocus -= refreshAsync;
-        ProcessManager.OnWindowHide -= refreshAsync;
+        ProcessManager.OnWindowOpenAsync -= refreshAsync;
+        ProcessManager.OnWindowCloseAsync -= refreshAsync;
+        ProcessManager.OnWindowFocusAsync -= refreshAsync;
+        ProcessManager.OnWindowHideAsync -= refreshAsync;
         base.Dispose();
     }
 }

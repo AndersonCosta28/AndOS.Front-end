@@ -2,13 +2,15 @@
 
 public interface IProcessManager
 {
-    public event Func<Window, Task> OnWindowOpen;
-    public event Func<Window, Task> OnWindowClose;
-    public event Func<Window, Task> OnWindowFocus;
-    public event Func<Window, Task> OnWindowHide;
+    public event Func<Window, Task> OnWindowOpenAsync;
+    public event Func<Window, Task> OnWindowCloseAsync;
+    public event Func<Window, Task> OnWindowFocusAsync;
+    public event Func<Window, Task> OnWindowHideAsync;
+    public event Func<Program, Dictionary<string, object>, Task> OnUpdateProgramArgumentsAsync;
+
     public List<Process> Processes { get; }
 
-    Task<Process> StartAsync(Program program);
+    Task StartAsync(Program program, Dictionary<string, object> arguments = default);
     Task EndAsync(Process process);
     Task MinimizeToTray(Process process);
     Task RestoreFromTray(Process process);

@@ -2,7 +2,9 @@
 
 public class Window
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Window() => this.Id = Guid.NewGuid();
+
+    public Guid Id { get; set; }
     public string Title { get; set; }
     public int Index { get; set; } = 1;
     public bool Resize { get; set; }

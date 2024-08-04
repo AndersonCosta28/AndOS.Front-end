@@ -1,40 +1,29 @@
-﻿using AndOS.Application.Components;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 
 namespace AndOS.Application.Entities;
 
-public class Program : AndOSBaseComponent
+public class Program
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public RenderFragment Icon { get; set; }
-    public string Name { get; set; }
+    public Program() => this.Id = Guid.NewGuid();
+
+    public Guid Id { get; init; }
+    public RenderFragment Icon { get; init; }
+    public string Name { get; init; }
     public bool IsExternalProgram { get; set; }
-    public bool CanMinimizeToTray { get; set; }
-    public bool InstantiateWindowOnOpen { get; set; } = true;
-    public bool AllowMultipleInstances { get; set; }
-    public Assembly Assembly { get; set; }
-    [Parameter] public Dictionary<string, object> Arguments { get; set; } = [];
-    public Dictionary<string, object> DefaultArguments { get; set; } = [];
-    public Dictionary<string, List<MenuItem>> MainMenuBarItems { get; set; } = [];
-    public List<string> Extensions { get; set; } = [];
-    public Program()
-    {
-        this.Assembly = Assembly.GetAssembly(GetType());
-    }
+    public bool CanMinimizeToTray { get; init; }
+    public bool InstantiateWindowOnOpen { get; init; } = true;
+    public bool AllowMultipleInstances { get; init; }
+    public Assembly Assembly => Assembly.GetAssembly(this.GetType());
+    public Dictionary<string, object> DefaultArguments { get; init; } = [];
+    public List<string> Extensions { get; init; } = [];
+    public Type ComponentType { get; init; }
 
     public RenderFragment ToRenderFragment() => builder =>
     {
-        builder.OpenComponent(0, this.GetType());
+        builder.OpenComponent(0, this.ComponentType);
         var arguments = this.DefaultArguments ?? [];
-
-        this.Arguments?.Select((keyValuePair, index) => new
-        {
-            keyValuePair,
-            index
-        })
-            .ToList()
-            .ForEach(x => arguments[x.keyValuePair.Key] = x.keyValuePair.Value);
-        builder.AddAttribute(1, nameof(Arguments), arguments);
+        builder.AddAttribute(2, nameof(Program), this);
+        builder.AddAttribute(2, "Arguments", arguments);
         builder.CloseComponent();
     };
 }

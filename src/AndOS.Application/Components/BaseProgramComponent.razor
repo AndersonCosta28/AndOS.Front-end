@@ -1,20 +1,26 @@
-﻿@inherits Program
+﻿@inherits AndOSBaseComponent
 @inject ILogger<BaseProgramComponent> Logger
 @namespace AndOS.Application.Components.Programs
 
-
 @code {
+    [Parameter] public Program Program { get; set; }
     [CascadingParameter(Name = nameof(UpdateTitle))] public Action<string> UpdateTitle { get; set; }
     [CascadingParameter(Name = nameof(UpdateMainMenuBarItem))] public Action<Dictionary<string, List<MenuItem>>> UpdateMainMenuBarItem { get; set; }
     [CascadingParameter(Name = nameof(OnProgramReady))] public Action OnProgramReady { get; set; }
+    [Parameter] public Dictionary<string, object> Arguments { get; set; } = [];
+    [Inject] protected IProcessManager _processManager { get; set; }
+    public Dictionary<string, List<MenuItem>> MainMenuBarItems { get; set; } = [];
 
     protected override void OnInitialized()
     {
         _logger ??= Logger;
+
         if (UpdateTitle is not null)
-            UpdateTitle(Name);
+            UpdateTitle(this.Program.Name);
         if (UpdateMainMenuBarItem is not null)
             UpdateMainMenuBarItem(this.MainMenuBarItems ?? []);
+
+        _processManager.OnUpdateProgramArgumentsAsync += CheckUpdateArguments;
         base.OnInitialized();
     }
 
@@ -24,5 +30,24 @@
             OnProgramReady();
 
         await base.OnInitializedAsync();
+    }
+
+    public override void Dispose()
+    {
+        _processManager.OnUpdateProgramArgumentsAsync -= CheckUpdateArguments;
+        base.Dispose();
+    }
+
+    Task CheckUpdateArguments(Program program, Dictionary<string, object> arguments)
+    {
+        if (program.Id != this.Program.Id)
+            return Task.CompletedTask;
+        Arguments = arguments;
+        return OnUpdateArguments(arguments);
+    }
+
+    protected virtual Task OnUpdateArguments(Dictionary<string, object> arguments)
+    {
+        return Task.CompletedTask;
     }
 }

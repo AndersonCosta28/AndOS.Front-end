@@ -11,16 +11,16 @@
 @code {
     protected override void OnInitialized()
     {
-        ProcessManager.OnWindowOpen += Refresh;
-        ProcessManager.OnWindowClose += Refresh;
-        ProcessManager.OnWindowFocus += Refresh;
+        ProcessManager.OnWindowOpenAsync += Refresh;
+        ProcessManager.OnWindowCloseAsync += Refresh;
+        ProcessManager.OnWindowFocusAsync += Refresh;
     }
 
     public void Dispose()
     {
-        ProcessManager.OnWindowOpen -= Refresh;
-        ProcessManager.OnWindowClose -= Refresh;
-        ProcessManager.OnWindowFocus -= Refresh;
+        ProcessManager.OnWindowOpenAsync -= Refresh;
+        ProcessManager.OnWindowCloseAsync -= Refresh;
+        ProcessManager.OnWindowFocusAsync -= Refresh;
     }
 
     Task Refresh(Window window)

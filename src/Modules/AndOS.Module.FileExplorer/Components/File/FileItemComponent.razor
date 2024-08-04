@@ -58,15 +58,15 @@
     {
         if (!FileExplorerConfig.CanOpenFiles)
             return;
-
+        Dictionary<string, object> arguments = [];
+        arguments["FileId"] = this.Content.Id;
         var response = await UserPreferenceService.GetDefaultProgramByExtensionAsync(new(Content.Extension));
         if (!string.IsNullOrWhiteSpace(response.DefaultProgramToExtension.Program))
         {
             var program = ProgramManager.Programs.Find(x => x.Name == response.DefaultProgramToExtension.Program);
             if (program != null)
             {
-                program.Arguments["FileId"] = this.Content.Id;
-                await ProcessManager.StartAsync(program);
+                await ProcessManager.StartAsync(program, arguments);
                 return;
             }
         }
@@ -86,8 +86,7 @@
             return;
 
         var programSelected = (Program)result.Data;
-        programSelected.Arguments["FileId"] = this.Content.Id;
-        await ProcessManager.StartAsync(programSelected);
+        await ProcessManager.StartAsync(programSelected, arguments);
     }
 
     Task PropertiesAsync()

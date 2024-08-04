@@ -23,7 +23,7 @@ else
                  class="window_container_header @(Content.Window.Focused ? "window_container_header_focused" : null)"
                  style="border-radius: @(Content.Window.FullScreen ? "0px" : "10px 10px 0px 0px");">
                 <div class="window_container_header_left" style="cursor: @(Content.Window.FullScreen ? "auto" : "all-scroll");"
-                     @ref=_headerLeftReference oncontextmenu="event.preventDefault();event.stopPropagation()">
+                     @ref=_headerLeftReference oncontextmenu="event.preventDefault();event.stopPropagation()" @onclick="LogInfo">
                     <FluentLabel Typo="Typography.PageTitle">@_title</FluentLabel>
                 </div>
                 <div class="window_container_header_right">
@@ -84,6 +84,11 @@ else
     private string _title = string.Empty;
     bool _programReady = false;
 
+    void LogInfo(MouseEventArgs eventArgs)
+    {
+        Logger.LogInformation($"ProcessId: {Content.Id}\nWindowId: {Content.Window.Id}\nProgramId: {Content.Program.Id}");
+    }
+
     void OnProgramReady()
     {
         _programReady = true;
@@ -102,7 +107,7 @@ else
 
         _removeListenersFunctionId = await JSRuntime.InvokeAsync<string>("draggableFunctions.startDrag", _container,
         _headerLeftReference, _objectReference);
-        Logger.Log(LogLevel.Debug,"result: {0}", _removeListenersFunctionId);
+        Logger.Log(LogLevel.Debug, "result: {0}", _removeListenersFunctionId);
         Logger.Log(LogLevel.Debug, nameof(AttachDraggable));
     }
 
@@ -128,8 +133,8 @@ else
     {
         _logger = Logger;
 
-        ProcessManager.OnWindowFocus += RefreshOnFocus;
-        ProcessManager.OnWindowHide += RefreshOnHide;
+        ProcessManager.OnWindowFocusAsync += RefreshOnFocus;
+        ProcessManager.OnWindowHideAsync += RefreshOnHide;
         ProgramManager.OnUninstall += OnUninstall;
         ProgramManager.OnInstall += OnInstall;
         base.OnInitialized();
@@ -158,8 +163,8 @@ else
 
     public override void Dispose()
     {
-        ProcessManager.OnWindowFocus -= RefreshOnFocus;
-        ProcessManager.OnWindowHide -= RefreshOnHide;
+        ProcessManager.OnWindowFocusAsync -= RefreshOnFocus;
+        ProcessManager.OnWindowHideAsync -= RefreshOnHide;
         ProgramManager.OnUninstall -= OnUninstall;
         ProgramManager.OnInstall -= OnInstall;
     }
