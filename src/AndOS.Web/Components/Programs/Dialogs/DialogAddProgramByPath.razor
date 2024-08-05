@@ -1,10 +1,11 @@
 ﻿@using AndOS.Domain.Enums
+@using System.Reflection
 @inject ILogger<DialogAddProgramByPath> Logger
 @inject IProgramManager ProgramManager
 @inject IToastService ToastService
 @inject IDialogService IDialogService
 @implements IDialogContentComponent
-@namespace AndOS.Application.Components.Programs.Dialogs
+@namespace AndOS.Web.Components.Programs.Dialogs
 
 <FluentDialogHeader>
     <FluentLabel Typo="Typography.H2">Add program</FluentLabel>
@@ -89,7 +90,7 @@
             loading = true;
             if (conflictVersion)
             {
-                Assembly assembly = Assembly.Load(binaryData);
+                var assembly = Assembly.Load(binaryData);
                 await ProgramManager.RemoveExternalAssemblyAsync(assembly);
             }
             await ProgramManager.AddExternalProgramAsync(binaryData);

@@ -1,7 +1,7 @@
 ﻿@inject IProcessManager ProcessManager
 @inject ILogger<WindowListComponent> Logger
 @implements IDisposable
-@namespace AndOS.Application.Components.Windows
+@namespace AndOS.Web.Components.Windows
 
 @foreach (var process in ProcessManager.Processes.Where(x => x.Window is not null))
 {

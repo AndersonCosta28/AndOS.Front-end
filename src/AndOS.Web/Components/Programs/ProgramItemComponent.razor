@@ -1,7 +1,7 @@
 ﻿@inject IContextMenuManager ContextMenuManager
 @inject ILogger<ProgramItemComponent> Logger
 @inherits AndOSBaseComponent
-@namespace AndOS.Application.Components.Programs
+@namespace AndOS.Web.Components.Programs
 
 <div id=@IdElement @ref="_container" style="background-color: @_backgroundColorFocus;" class="program_item_container"
      @ondblclick="OpenAsync" @onclick="() => Selected = true" @oncontextmenu=ShowMenuItemsAsync>
