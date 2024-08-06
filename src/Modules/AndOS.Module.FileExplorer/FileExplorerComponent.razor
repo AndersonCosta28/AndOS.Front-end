@@ -106,7 +106,7 @@
     {
         Logger.Log(LogLevel.Debug, "Value of {0} is {1}", nameof(Content), Content);
         IdElement = $"system-file-{Guid.NewGuid()}";
-        MenuItem menuItemNewFolder = new("New folder", NewFolderAsync, callBackDisabled: () => Task.FromResult(!ContentFolder.Permissions.Contains(Core.Enums.FolderPermission.Read)));
+        MenuItem menuItemNewFolder = new("New folder", NewFolderAsync, callBackDisabled: () => Task.FromResult(!ContentFolder.Permissions.Contains(Core.Enums.FolderPermission.Write)));
         MenuItem menuItemRefresh = new("Refresh", refreshAsync);
         _menuItems.AddRange([menuItemNewFolder, menuItemRefresh]);
         FolderService.OnFolderCreated += refreshAsync;
