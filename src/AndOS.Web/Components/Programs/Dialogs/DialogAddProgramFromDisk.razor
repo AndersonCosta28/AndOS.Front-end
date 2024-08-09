@@ -1,6 +1,6 @@
 ﻿@using AndOS.Domain.Enums
 @using System.Reflection
-@inject ILogger<DialogAddProgramByPath> Logger
+@inject ILogger<DialogAddProgramFromDisk> Logger
 @inject IProgramManager ProgramManager
 @inject IToastService ToastService
 @inject IDialogService IDialogService
@@ -12,7 +12,7 @@
 </FluentDialogHeader>
 <FluentDialogBody>
     <FluentInputFile @ref="@UploadProgram" DragDropZoneVisible="false" AnchorId="UploadProgram"
-        Mode="InputFileMode.SaveToTemporaryFolder" OnProgressChange="@(e =>
+                     Mode="InputFileMode.Stream" OnProgressChange="@(e =>
                      {
                          progressPercent = e.ProgressPercent;
                          progressTitle = e.ProgressTitle;
@@ -133,6 +133,5 @@
         {
             file.LocalFile?.Delete();
         }
-
     }
 }

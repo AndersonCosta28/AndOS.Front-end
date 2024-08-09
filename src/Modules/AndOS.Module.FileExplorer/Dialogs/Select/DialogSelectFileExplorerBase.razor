@@ -6,9 +6,11 @@
 @inject ILogger<DialogSelectFileExplorerBase<T>> Logger
 
 <CascadingValue TValue="FileExplorerConfig" Value="config">
-    <FluentDialogBody Style="height: 80%">
-        <FileExplorerComponent Content="@string.Empty" @ref=FileExplorerComponentRef
-                               Config="config" />
+    <FluentDialogBody Style="height: 80%; ">
+        <FileExplorerComponent 
+            Content="@string.Empty" 
+            @ref=FileExplorerComponentRef
+            Config="config" />
     </FluentDialogBody>
     <FluentDialogFooter>
         <div onclick="event.preventDefault();">
@@ -33,6 +35,7 @@
     {
         Dialog.Instance.Parameters.OnDialogClosing = EventCallback.Factory.Create<DialogInstance>(this, async (DialogInstance instance) =>
         {
+            this.FileExplorerComponentRef.Dispose();
             await this.FileExplorerComponentRef.DisposeAsync();
         });
 

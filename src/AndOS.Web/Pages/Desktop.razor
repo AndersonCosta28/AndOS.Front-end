@@ -17,8 +17,8 @@
 
 <PageTitle>Desktop</PageTitle>
 <div id="@IdElement" @oncontextmenu="ShowMenuItemsAsync">
-    <WindowListComponent />
-    <ProgramListComponent />
+    <WindowList />
+    <ProgramList />
 </div>
 
 @code {
@@ -53,7 +53,7 @@
             {
                 Width = "600px"
             };
-        var dialog = await DialogService.ShowDialogAsync<DialogAddProgramByPath>(dialogParameters);
+        var dialog = await DialogService.ShowDialogAsync<DialogAddProgramFromDisk>(dialogParameters);
         var result = await dialog.Result;
     }
 

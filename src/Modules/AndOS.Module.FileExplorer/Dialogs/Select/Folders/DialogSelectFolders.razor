@@ -23,7 +23,7 @@
     protected override async Task Confirm()
     {
         var selectedFolders = config.ItemsSelect
-                                       .Select(x => ((FolderItemComponent)x).Content)
+                                       .Select(x => ((FolderItem)x).Content)
                                        .Where(x => x != null)
                                        .ToList() ?? [];
         var folders = selectedFolders

@@ -21,7 +21,7 @@
 
     protected override async Task Confirm()
     {
-        var selectedFiles = config.ItemsSelect.Select(x => ((FileItemComponent)x)?.Content)
+        var selectedFiles = config.ItemsSelect.Select(x => ((FileItem)x)?.Content)
                                             .Where(x => x != null)
                                             .ToList() ?? [];
 

@@ -1,6 +1,4 @@
 ﻿using AndOS.Application.Extensions;
-using AndOS.Application.Interfaces;
-using AndOS.Shared.DTOs;
 using AndOS.Shared.Requests.Files.Create;
 using AndOS.Shared.Requests.Files.Delete;
 using AndOS.Shared.Requests.Files.Get.GetById;
@@ -9,15 +7,12 @@ using AndOS.Shared.Requests.Files.Update.Content;
 using AndOS.Shared.Requests.Files.Update.Rename;
 using Microsoft.Extensions.Logging;
 using Microsoft.FluentUI.AspNetCore.Components;
-using System.Net.Http.Json;
-
 namespace AndOS.Infrastructure.Api;
 
 internal class FileService(HttpClient httpClient,
     ILogger<FileService> logger,
     ICloudStorageServiceFactory cloudStorageServiceFactory,
-    IToastService toastService,
-    IDialogService dialogService) : IFileService
+    IToastService toastService) : IFileService
 {
     public event Func<Task> OnFileCreated;
     public event Func<Task> OnFileUpdated;
@@ -93,7 +88,7 @@ internal class FileService(HttpClient httpClient,
             }
 
             var service = cloudStorageServiceFactory.Create(cloudStorage);
-            await service.UploadAsync(url, content, cancellationToken);
+            await service.UploadAsync(url, content, null, cancellationToken);
             toastService.ShowSuccess("File saved successfully");
         }
         catch (Exception ex)

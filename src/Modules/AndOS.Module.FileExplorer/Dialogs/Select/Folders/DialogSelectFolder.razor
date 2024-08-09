@@ -17,7 +17,7 @@
 
     protected override async Task Confirm()
     {
-        var folderSelect = ((FolderItemComponent)config.ItemsSelect.FirstOrDefault())?.Content;
+        var folderSelect = ((FolderItem)config.ItemsSelect.FirstOrDefault())?.Content;
         if (folderSelect is ChildrenFolderDTO childrenFolder)
         {
             var folder = new SelectedFolder(folderSelect.Id, folderSelect.Name);

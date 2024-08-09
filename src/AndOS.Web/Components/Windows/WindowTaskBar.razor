@@ -1,5 +1,5 @@
 ﻿@inherits AndOSBaseComponent
-@inject ILogger<WindowTaskBarComponent> Logger
+@inject ILogger<WindowTaskBar> Logger
 
 <div class="window-taskbar-component" @key=Process @onclick="TooglerAsync" @ref=_container
     @oncontextmenu="ShowMenuItemsAsync">

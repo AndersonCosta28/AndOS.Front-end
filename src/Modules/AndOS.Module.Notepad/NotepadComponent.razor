@@ -105,7 +105,7 @@
         try
         {
             var service = CloudStorageServiceFactory.Create(response.CloudStorage);
-            text = await service.DownloadAsync(response.Url);
+            text = await service.DownloadStringAsync(response.Url);
             UpdateTitle($"{this.Program.Name} - {response.Name}");
             StateHasChanged();
         }

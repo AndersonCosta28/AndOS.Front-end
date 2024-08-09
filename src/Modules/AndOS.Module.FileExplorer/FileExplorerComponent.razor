@@ -1,4 +1,5 @@
-﻿@using AndOS.Module.FileExplorer.Enums
+﻿@using AndOS.Module.FileExplorer.Dialogs.AddFileFromDisk
+@using AndOS.Module.FileExplorer.Enums
 @using AndOS.Module.FileExplorer.Params.OpenFolder
 @using AndOS.Module.FileExplorer.Components.Folder
 @using AndOS.Module.FileExplorer.Components.Folder.Dialogs.Create
@@ -16,9 +17,11 @@
 
     <div class="search-bar">
         <div>
-            <FluentIcon Value="@(new Icons.Regular.Size28.ArrowCircleLeft())" OnClick=GoBack
+            <FluentIcon Value="@(new Icons.Regular.Size28.ArrowCircleLeft())"
+                        OnClick=GoBack
                         Color="navigationHistory.Count > 0 ? Color.Neutral : Color.Disabled" />
-            <FluentIcon Value="@(new Icons.Regular.Size28.ArrowCircleRight())" OnClick=GoForward
+            <FluentIcon Value="@(new Icons.Regular.Size28.ArrowCircleRight())"
+                        OnClick=GoForward
                         Color="forwardHistory.Count > 0 ? Color.Neutral : Color.Disabled" />
         </div>
         <input type="text" @bind="Content" @onkeydown="HandleKeyDown"
@@ -29,11 +32,14 @@
         <CascadingValue TValue="FileExplorerConfig" Value="Config">
             @foreach (var folder in ContentFolder?.Folders ?? [])
             {
-                <FolderItemComponent Content=@folder @key=folder OnOpen="LoadFolders" />
+                <FolderItem Content=@folder
+                            @key=folder
+                            OnOpen="LoadFolders" />
             }
-            @foreach (var folder in ContentFolder?.Files ?? [])
+            @foreach (var file in ContentFolder?.Files ?? [])
             {
-                <FileItemComponent Content="folder" />
+                <FileItem Content="file"
+                          @key=file />
             }
         </CascadingValue>
     </div>
@@ -106,9 +112,10 @@
     {
         Logger.Log(LogLevel.Debug, "Value of {0} is {1}", nameof(Content), Content);
         IdElement = $"system-file-{Guid.NewGuid()}";
+        MenuItem menuItemAddFileFromDisk = new("Add file from disk", AddFileFromDisk, callBackDisabled: () => Task.FromResult(!ContentFolder.Permissions.Contains(Core.Enums.FolderPermission.Write)));
         MenuItem menuItemNewFolder = new("New folder", NewFolderAsync, callBackDisabled: () => Task.FromResult(!ContentFolder.Permissions.Contains(Core.Enums.FolderPermission.Write)));
         MenuItem menuItemRefresh = new("Refresh", refreshAsync);
-        _menuItems.AddRange([menuItemNewFolder, menuItemRefresh]);
+        _menuItems.AddRange([menuItemAddFileFromDisk, menuItemNewFolder, menuItemRefresh]);
         FolderService.OnFolderCreated += refreshAsync;
         FolderService.OnFolderUpdated += refreshAsync;
         FolderService.OnFolderDeleted += refreshAsync;
@@ -123,6 +130,17 @@
         await LoadFolders(new OpenFolderByPath(Content, NavigationType.Default, true, true));
         await base.refreshAsync();
         await base.OnInitializedAsync();
+    }
+
+    public override void Dispose()
+    {
+        FolderService.OnFolderCreated -= refreshAsync;
+        FolderService.OnFolderUpdated -= refreshAsync;
+        FolderService.OnFolderDeleted -= refreshAsync;
+        FileService.OnFileCreated -= refreshAsync;
+        FileService.OnFileUpdated -= refreshAsync;
+        FileService.OnFileDeleted -= refreshAsync;
+        base.Dispose();
     }
     #endregion
 
@@ -213,14 +231,13 @@
         await DialogService.ShowDialogAsync<DialogCreateFolder>(createParams, dialogParams);
     }
 
-    public override void Dispose()
+    async Task AddFileFromDisk()
     {
-        FolderService.OnFolderCreated -= refreshAsync;
-        FolderService.OnFolderUpdated -= refreshAsync;
-        FolderService.OnFolderDeleted -= refreshAsync;
-        FileService.OnFileCreated -= refreshAsync;
-        FileService.OnFileUpdated -= refreshAsync;
-        FileService.OnFileDeleted -= refreshAsync;
-        base.Dispose();
+        DialogParameters dialogParameters = new()
+            {
+                Width = "600px"
+            };
+        var data = new AddFileFromDiskParam(ContentFolder.Id);
+        var dialog = await DialogService.ShowDialogAsync<DialogAddFileFromDisk>(data, dialogParameters);
     }
 }

@@ -15,9 +15,11 @@ public class FileExplorerDialogs(IDialogService dialogService, IToastService toa
         };
         var parameters = new DialogParameters()
         {
+            Title = $"Save as",
+            Modal = false,
             Width = "70%",
             Height = "70%",
-            Title = "Save as"
+            PreventScroll = true
         };
         await dialogService.ShowDialogAsync<DialogSaveFileExplorerBase>(data, parameters);
     }

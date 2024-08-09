@@ -16,7 +16,7 @@
 
     protected override async Task Confirm()
     {
-        var selectedFile = ((FileItemComponent)config.ItemsSelect.FirstOrDefault())?.Content;
+        var selectedFile = ((FileItem)config.ItemsSelect.FirstOrDefault())?.Content;
         if (selectedFile == null)
         {
             await Dialog.CloseAsync(null);

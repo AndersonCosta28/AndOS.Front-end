@@ -13,7 +13,7 @@
         <EditForm Model="@loginModel" OnValidSubmit="@HandleValidSubmit">
             <FluentTextField @bind-Value="loginModel.Email" Label="Email" Placeholder="Digite seu email" Style="width: 100%; margin-bottom: 10px;" TextFieldType="TextFieldType.Email" />
             <FluentTextField @bind-Value="loginModel.Password" Label="Senha" Placeholder="Digite sua senha" Style="width: 100%; margin-bottom: 10px;" TextFieldType="TextFieldType.Password" />
-            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" OnClick="HandleValidSubmit" Style="width: 100%; background-color: #0078d4; color: #ffffff;" Loading=loading>Login</FluentButton>
+            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent" Style="width: 100%; background-color: #0078d4; color: #ffffff;" Loading=loading>Login</FluentButton>
         </EditForm>
         <p>
             Don't have an account? <span @onclick=GoToRegister class="hiperlink">Register</span>

@@ -1,14 +1,13 @@
-﻿@using AndOS.Web.Components.TaskBar
-@using AndOS.Web.Components.TopBar
+﻿@using AndOS.Web.Components.TopBar
 @using Microsoft.AspNetCore.Components
 @using System.Reflection
 @inherits LayoutComponentBase
 @inject IContextMenuManager ContextMenuManager
 
 <div id="main_layout_container">
-    <TopBarComponent></TopBarComponent>
+    <TopBar></TopBar>
     @Body
-    <TaskBarComponent></TaskBarComponent>
+    <TaskBar/>
     <FluentToastProvider MaxToastCount="10" />
     <FluentDialogProvider />
     <FluentMenu Style="position: fixed" @bind-Open="ContextMenuManager.Open" @ref=fluentMenuRef Trigger="MouseButton.Right" Anchored="false">

@@ -1,11 +1,11 @@
 ﻿@inject IProcessManager ProcessManager
-@inject ILogger<WindowListComponent> Logger
+@inject ILogger<WindowList> Logger
 @implements IDisposable
 @namespace AndOS.Web.Components.Windows
 
 @foreach (var process in ProcessManager.Processes.Where(x => x.Window is not null))
 {
-    <WindowItemComponent Content="process" @key=process />
+    <WindowItem Content="process" @key=process />
 }
 
 @code {

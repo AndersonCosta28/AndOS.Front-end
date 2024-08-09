@@ -3,7 +3,7 @@
 
 @inherits AndOSBaseComponent
 @namespace AndOS.Web.Components.TaskBar
-@inject ILogger<TaskBarComponent> Logger
+@inject ILogger<TaskBar> Logger
 
 @if (ProcessManager.Processes.Exists(x => x.Window is not null))
 {
@@ -11,7 +11,7 @@
         <div id="taskbar_container_content">
             @foreach (var process in ProcessManager.Processes.Where(x => x.Window is not null))
             {
-                <WindowTaskBarComponent Process="process" @key=process />
+                <WindowTaskBar Process="process" @key=process />
             }
         </div>
     </div>

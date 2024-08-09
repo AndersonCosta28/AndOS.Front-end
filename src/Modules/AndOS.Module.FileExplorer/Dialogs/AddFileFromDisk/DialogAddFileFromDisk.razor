@@ -1,0 +1,111 @@
+﻿@using AndOS.Core.Schemas
+@using AndOS.Domain.Enums
+@using System.Reflection
+@namespace AndOS.Module.FileExplorer.Dialogs.AddFileFromDisk
+@inject ILogger<DialogAddFileFromDisk> Logger
+@inject IProgramManager ProgramManager
+@inject IToastService ToastService
+@inject IDialogService IDialogService
+@inject ICloudStorageServiceFactory CloudStorageServiceFactory
+@inject IFileService FileService
+@implements IDialogContentComponent<AddFileFromDiskParam>
+
+<FluentDialogHeader>
+    <FluentLabel Typo="Typography.H2">Add files from disk</FluentLabel>
+</FluentDialogHeader>
+<FluentDialogBody>
+    <FluentInputFile @ref="@UploadProgram" DragDropZoneVisible="false" AnchorId="UploadProgram"
+                     Mode="InputFileMode.Stream"
+                     OnProgressChange="@(e =>
+                     {
+                         progressPercent = e.ProgressPercent;
+                         progressTitle = e.ProgressTitle;
+                     })"
+                     OnCompleted="@OnCompleted"
+                     Multiple=false />
+    <FluentProgress Min="0" Max="100" Visible="@(progressPercent > 0)" Value="@progressPercent" />
+    <FluentLabel Alignment="HorizontalAlignment.Center">
+        @progressTitle
+    </FluentLabel>
+
+    <FluentButton Id="UploadProgram" Appearance="Appearance.Accent">
+        Upload files
+    </FluentButton>
+
+    @if (Files.Any())
+    {
+        <FluentLabel Typo="Typography.H4">File(s) uploaded:</FluentLabel>
+        <FluentDataGrid Items="Files">
+            <TemplateColumn Title="Name" Sortable="true">
+                <FluentTextField @bind-Value="context.Name"
+                                 Required
+                                 Pattern=FileSchema.RegexName
+                                 Minlength="FileSchema.MinLenghtName"
+                                 Maxlength="FileSchema.MaxLenghtName" />
+            </TemplateColumn>
+            <TemplateColumn Title="Extension" Sortable="true">
+                <FluentTextField @bind-Value="context.Extension"
+                                 Pattern="@FileSchema.RegexExtension"
+                                 Minlength="FileSchema.MinLenghtExtension"
+                                 Maxlength="FileSchema.MaxLenghtExtension" />
+            </TemplateColumn>
+            <PropertyColumn Title="Size" Property="@(p => $"{Decimal.Divide(p.File.Size, 1024):N} KB")" Sortable="true" />
+            <TemplateColumn Title="Error" Sortable="true">
+                @context.File.ErrorMessage
+            </TemplateColumn>
+        </FluentDataGrid>
+    }
+</FluentDialogBody>
+<FluentDialogFooter>
+    <FluentButton OnClick="Submit">Ok</FluentButton>
+</FluentDialogFooter>
+@code {
+    [CascadingParameter] public FluentDialog Dialog { get; set; }
+    [Parameter] public AddFileFromDiskParam Content { get; set; }
+    FluentInputFile UploadProgram = default!;
+    int progressPercent;
+    string progressTitle;
+    IQueryable<FileLoaded> Files = Array.Empty<FileLoaded>().AsQueryable();
+
+    async Task Submit()
+    {
+        var file = Files.First();
+        // var data = File.ReadAllText(file.File.LocalFile.FullName);
+        var data = file.File.Stream;
+        var length = data.Length;
+        var result = await FileService.CreateAsync(new(
+                            name: file.Name,
+                            extension: file.Extension,
+                            parentFolderId: Content.ParentFolderId,
+                            size: length.ToString()
+                        ));
+
+
+        var service = CloudStorageServiceFactory.Create(result.CloudStorage);
+        await service.UploadAsync(result.Url, data, (current, total) =>
+        {
+            Logger.LogInformation("Current: {0}\nTotal: {1}", current, total);
+            progressPercent = ((int)current / (int)total) * 100;
+            progressTitle = "Uploading...";
+        });
+        progressTitle = "Completed";
+
+        ToastService.ShowSuccess("File saved successfully");
+    }
+
+    void OnCompleted(IEnumerable<FluentInputFileEventArgs> files)
+    {
+        Files = files.Select(x => new FileLoaded(x)).AsQueryable();
+        if (Files.Count() == 0)
+            return;
+        progressPercent = UploadProgram!.ProgressPercent;
+        progressTitle = UploadProgram!.ProgressTitle;
+    }
+
+    class FileLoaded(FluentInputFileEventArgs file)
+    {
+        public string Name { get; set; } = Path.GetFileNameWithoutExtension(file.Name);
+        public string Extension { get; set; } = Path.GetExtension(file.Name)[1..];
+        public FluentInputFileEventArgs File { get; set; } = file;
+    }
+}

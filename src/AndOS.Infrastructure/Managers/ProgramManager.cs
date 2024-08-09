@@ -52,7 +52,8 @@ internal class ProgramManager : IProgramManager
             .ToList())
         {
             _programs.Remove(program);
-            await OnUninstall?.Invoke(program);
+            if (OnUninstall != null)
+                await OnUninstall?.Invoke(program);
         }
         _assemblies.Remove(assembly);
         await _assemblyManager.Remove(assembly);
@@ -109,7 +110,8 @@ internal class ProgramManager : IProgramManager
             {
                 program.IsExternalProgram = true;
                 _programs.Add(program);
-                await OnInstall?.Invoke(program);
+                if (OnInstall != null)
+                    await OnInstall?.Invoke(program);
             }
             _assemblies.Add(assembly);
         }

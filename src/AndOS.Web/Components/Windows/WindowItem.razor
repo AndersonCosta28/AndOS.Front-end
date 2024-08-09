@@ -1,4 +1,4 @@
-﻿@inject ILogger<WindowItemComponent> Logger
+﻿@inject ILogger<WindowItem> Logger
 @inherits AndOSBaseComponent
 @namespace AndOS.Web.Components.Windows
 
@@ -78,12 +78,12 @@ else
     private ElementReference _subContainer;
     private Dimensions _sizeWithoutFullScreen;
     private Dimensions _positionWithoutFullScreen;
-    private DotNetObjectReference<WindowItemComponent> _objectReference;
+    private DotNetObjectReference<WindowItem> _objectReference;
     private IJSObjectReference _resizeObserver;
     private string _removeListenersFunctionId = string.Empty;
     private string _title = string.Empty;
     bool _programReady = false;
-
+    
     void LogInfo(MouseEventArgs eventArgs)
     {
         Logger.LogInformation($"ProcessId: {Content.Id}\nWindowId: {Content.Window.Id}\nProgramId: {Content.Program.Id}");

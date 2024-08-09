@@ -19,7 +19,7 @@ public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
                 await destroyWindowAsync(process);
                 process.Window = null;
             }
-
+            process.Program = null;
             _processes.Remove(process);
         }
         catch (Exception ex)
@@ -119,7 +119,8 @@ public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
     {
         var window = process.Window;
         process.Window = null;
-        await OnWindowCloseAsync?.Invoke(window);
+        if (OnWindowCloseAsync != null)
+            await OnWindowCloseAsync?.Invoke(window);
         await FocusOtherWindowAsync();
     }
 
@@ -130,17 +131,15 @@ public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
         var window = _windows.Where(w => !w.Hide).MaxBy(x => x.Index);
 
         window.Focused = true;
-        if (OnWindowFocusAsync is not null)
-        {
+        if (OnWindowFocusAsync != null)
             await OnWindowFocusAsync?.Invoke(window);
-        }
     }
 
     public async Task HideWindowAsync(Window window)
     {
         window.Focused = false;
         window.Hide = true;
-        if (OnWindowHideAsync is not null)
+        if (OnWindowHideAsync != null)
             await OnWindowHideAsync.Invoke(window);
         await FocusOtherWindowAsync();
     }
@@ -188,7 +187,8 @@ public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
         var nextIndex = this._windows.Any() ? this._windows.Max(x => x.Index) + 1 : 1;
         var newWindow = new Window() { Draggable = true, Resize = true, Title = $"Window {_windows.Count()}", Index = nextIndex, Focused = true };
         process.Window = newWindow;
-        await OnWindowOpenAsync?.Invoke(newWindow);
+        if (OnWindowOpenAsync != null)
+            await OnWindowOpenAsync?.Invoke(newWindow);
         await this.FocusWindowAsync(newWindow);
     }
     #endregion

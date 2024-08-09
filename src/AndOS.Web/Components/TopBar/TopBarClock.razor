@@ -10,7 +10,7 @@
     {
         while (true)
         {
-            await Task.Delay(1000); // Aguarda 1 segundo
+            await Task.Delay(1000).ConfigureAwait(false); // Aguarda 1 segundo
             currentTime = DateTime.Now;
             StateHasChanged(); // Renderiza novamente o componente
         }

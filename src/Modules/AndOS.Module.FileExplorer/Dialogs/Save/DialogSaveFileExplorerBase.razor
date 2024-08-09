@@ -13,8 +13,10 @@
 @inject IAccountService AccountService
 <CascadingValue TValue="FileExplorerConfig" Value="config">
     <FluentDialogBody Style="height: 80%">
-        <FileExplorerComponent Content="@(Content.File?.CurrentPath ?? string.Empty)" @ref=FileExplorerComponentRef
-                               Config="config" />
+        <FileExplorerComponent 
+            Content="@(Content.File?.CurrentPath ?? string.Empty)" 
+            @ref=FileExplorerComponentRef
+            Config="config" />
     </FluentDialogBody>
     <FluentDialogFooter onclick="event.preventDefault();">
         <FluentEditForm OnValidSubmit="Confirm" Model="Model">
@@ -60,6 +62,7 @@
 
         Dialog.Instance.Parameters.OnDialogClosing = EventCallback.Factory.Create<DialogInstance>(this, async (DialogInstance instance) =>
         {
+            this.FileExplorerComponentRef.Dispose();
             await this.FileExplorerComponentRef.DisposeAsync();
         });
         base.OnInitialized();

@@ -15,10 +15,10 @@ public class FileExplorerConfig
 
     public void OnSingleSelect(SystemItemBaseComponent component, bool value)
     {
-        if (ItemToSelect == ItemTypeForSelection.Folder && !component.GetType().Equals(typeof(FolderItemComponent)))
+        if (ItemToSelect == ItemTypeForSelection.Folder && !component.GetType().Equals(typeof(FolderItem)))
             return;
 
-        if (ItemToSelect == ItemTypeForSelection.File && !component.GetType().Equals(typeof(FileItemComponent)))
+        if (ItemToSelect == ItemTypeForSelection.File && !component.GetType().Equals(typeof(FileItem)))
             return;
 
         bool contains = ItemsSelect.Contains(component);
@@ -43,10 +43,10 @@ public class FileExplorerConfig
 
     public void OnMultipleSelect(SystemItemBaseComponent component, bool value)
     {
-        if (ItemToSelect == ItemTypeForSelection.Folder && !component.GetType().Equals(typeof(FolderItemComponent)))
+        if (ItemToSelect == ItemTypeForSelection.Folder && !component.GetType().Equals(typeof(FolderItem)))
             return;
 
-        if (ItemToSelect == ItemTypeForSelection.File && !component.GetType().Equals(typeof(FileItemComponent)))
+        if (ItemToSelect == ItemTypeForSelection.File && !component.GetType().Equals(typeof(FileItem)))
             return;
 
         if (!ItemsSelect.Contains(component) && value)

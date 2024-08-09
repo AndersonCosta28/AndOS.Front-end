@@ -16,6 +16,7 @@ internal class ContextMenuManager : IContextMenuManager
     public async Task SetItems(IList<MenuItem> menus, MouseEventArgs args)
     {
         ContextMenuItems = menus;
-        await OnSetItems?.Invoke(args);
+        if (OnSetItems != null)
+            await OnSetItems?.Invoke(args);
     }
 }
