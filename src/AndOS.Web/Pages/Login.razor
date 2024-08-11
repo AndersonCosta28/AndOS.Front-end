@@ -2,11 +2,13 @@
 @using AndOS.Domain.Consts
 @using AndOS.Infrastructure.Api
 @using AndOS.Infrastructure.Authentication
+@using Blazored.LocalStorage
 @namespace AndOS.Web.Pages.Login
 @inject AuthenticationService AuthServices
 @inject NavigationManager NavigationManager
 @inject IToastService ToastService
 @inject ILogger<Login> Logger
+@inject ILocalStorageService LocalStorage
 <div class="login-page">
     <div class="login-form">
         <h3>Login</h3>
@@ -25,6 +27,13 @@
     private LoginModel loginModel = new LoginModel();
     private bool loading = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        var token = await LocalStorage.GetItemAsync<string>("authToken");
+        if (string.IsNullOrWhiteSpace(token))
+            return;
+        NavigationManager.NavigateTo(Routes.Welcome, true, true);
+    }
     private void GoToRegister()
     {
         NavigationManager.NavigateTo(Routes.Register);

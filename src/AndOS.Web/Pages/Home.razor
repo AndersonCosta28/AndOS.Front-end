@@ -4,9 +4,11 @@
 <h3>Home</h3>
 <button @onclick=ToLogin>Login</button>
 @code {
-    Task ToLogin(MouseEventArgs @event)
+    Task ToLogin()
     {
         NavigationManager.NavigateTo(Routes.Login);
         return Task.CompletedTask;
     }
+
+    protected override void OnInitialized() => NavigationManager.NavigateTo(Routes.Login);
 }
