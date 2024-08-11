@@ -11,25 +11,28 @@
 @inject IFileService FileService
 @inject ICloudStorageServiceFactory CloudStorageServiceFactory
 @inject IAccountService AccountService
+@inject IDialogService DialogService
 <CascadingValue TValue="FileExplorerConfig" Value="config">
     <FluentDialogBody Style="height: 80%">
-        <FileExplorerComponent 
-            Content="@(Content.File?.CurrentPath ?? string.Empty)" 
-            @ref=FileExplorerComponentRef
-            Config="config" />
+        <FileExplorerComponent Content="@(Content.File?.CurrentPath ?? string.Empty)" @ref=FileExplorerComponentRef
+                               Config="config" />
     </FluentDialogBody>
     <FluentDialogFooter onclick="event.preventDefault();">
         <FluentEditForm OnValidSubmit="Confirm" Model="Model">
             <FluentStack Orientation="Orientation.Vertical">
                 <FluentStack>
                     <FluentTextField Required Label="Name" @bind-Value=Model.Name Pattern="@FileSchema.RegexName"
-                                     Minlength="FileSchema.MinLenghtName" Maxlength="FileSchema.MaxLenghtName" Style="width: 300px" />
-                    <FluentTextField Required Label="Extension" @bind-Value=Model.Extension Pattern="@FileSchema.RegexExtension"
-                                     Minlength="FileSchema.MinLenghtExtension" Maxlength="FileSchema.MaxLenghtExtension" Style="width: 70px" />
+                                     Minlength="FileSchema.MinLenghtName" Maxlength="FileSchema.MaxLenghtName"
+                                     Style="width: 300px" />
+                    <FluentTextField Required Label="Extension" @bind-Value=Model.Extension
+                                     Pattern="@FileSchema.RegexExtension" Minlength="FileSchema.MinLenghtExtension"
+                                     Maxlength="FileSchema.MaxLenghtExtension" Style="width: 70px" />
                 </FluentStack>
                 <FluentStack HorizontalAlignment=" HorizontalAlignment.End">
                     <FluentButton Loading="_loading" Type="ButtonType.Submit">Save</FluentButton>
-                    <FluentButton Disabled="_loading" OnClick="async () => await Dialog.CancelAsync()">Cancel</FluentButton>
+                    <FluentButton Disabled="_loading" OnClick="async () => await Dialog.CancelAsync()">
+                        Cancel
+                    </FluentButton>
                 </FluentStack>
             </FluentStack>
         </FluentEditForm>
@@ -60,7 +63,8 @@
     {
         Logger.Log(LogLevel.Debug, "Id do arquivo {0}", Content.File.Id);
 
-        Dialog.Instance.Parameters.OnDialogClosing = EventCallback.Factory.Create<DialogInstance>(this, async (DialogInstance instance) =>
+        Dialog.Instance.Parameters.OnDialogClosing = EventCallback.Factory.Create<DialogInstance>(this, async (DialogInstance
+        instance) =>
         {
             this.FileExplorerComponentRef.Dispose();
             await this.FileExplorerComponentRef.DisposeAsync();
@@ -78,23 +82,25 @@
         await base.OnInitializedAsync();
     }
 
+    bool CheckIfFullNameFileIsDuplicated(out ChildrenFileDTO file)
+    {
+        file = FileExplorerComponentRef.ContentFolder.Files.Find(currentFile =>
+        currentFile.Name.Equals(Model.Name) &&
+        currentFile.Extension.Equals(Model.Extension));
+
+        return file != null;
+    }
+
     protected virtual async Task Confirm()
     {
-        _loading = true;
         try
         {
-            var result = await FileService.CreateAsync(new(
-                                extension: Model.Extension,
-                                name: Model.Name,
-                                parentFolderId: FileExplorerComponentRef.ContentFolder.Id,
-                                size: Content.Value.Length.ToString()
-                            ));
+            _loading = true;
 
-
-            var service = CloudStorageServiceFactory.Create(result.CloudStorage);
-            await service.UploadAsync(result.Url, Content.Value);
-            ToastService.ShowSuccess("File saved successfully");
-            await Dialog.CloseAsync();
+            if (CheckIfFullNameFileIsDuplicated(out ChildrenFileDTO file))
+                await ReplaceFile(file);
+            else
+                await SaveFileAsNew();
         }
         catch (Exception e)
         {
@@ -105,5 +111,34 @@
         {
             _loading = false;
         }
+    }
+
+    async Task SaveFileAsNew()
+    {
+        var response = await FileService.CreateAsync(new(
+            extension: Model.Extension,
+            name: Model.Name,
+            parentFolderId: FileExplorerComponentRef.ContentFolder.Id,
+            size: Content.Value.Length.ToString()
+            ));
+
+        var service = CloudStorageServiceFactory.Create(response.CloudStorage);
+        await service.UploadAsync(response.Url, Content.Value);
+        ToastService.ShowSuccess("File saved successfully");
+        await Dialog.CloseAsync();
+    }
+
+    async Task ReplaceFile(ChildrenFileDTO file)
+    {
+        var dialog = await DialogService.ShowConfirmationAsync($"Do you have sure that want replace this file?\n{Model.Name}.{Model.Extension}");
+        var result = await dialog.Result;
+        if (result.Cancelled)
+            return;
+
+        var response = await FileService.UpdateContentFileAsync(new(id: file.Id));
+        var service = CloudStorageServiceFactory.Create(response.CloudStorage);
+        await service.UploadAsync(response.Url, Content.Value);
+        ToastService.ShowSuccess("File saved successfully");
+        await Dialog.CloseAsync();
     }
 }

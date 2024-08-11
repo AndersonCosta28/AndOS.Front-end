@@ -1,0 +1,14 @@
+#taskbar_container {
+    height: 100%;
+    width: 100%;
+    user-select: none;
+    box-shadow: 0px -2px 5px var(--taskbar-shadow-color);
+    border: 1px solid var(--taskbar-border-color);
+    background-color: var(--taskbar-bg-color);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    overflow-x: auto;
+    padding: 0 10px;
+}

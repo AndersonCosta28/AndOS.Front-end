@@ -1,15 +1,1 @@
-﻿#home_container {
-    flex: 1;
-    height: 100%;
-    width: 100%;
-    z-index: 0;
-    height: 100%;
-    overflow: hidden;
-    position: relative;
-}
-
-#home_content {
-    padding: 20px;
-    display: flex;
-    flex-wrap: wrap;
-}
+﻿

@@ -9,8 +9,12 @@
 <FluentDialogBody>
     <FluentListbox TOption="Program" Items="programs" @bind-SelectedOption=@Program>
         <OptionTemplate>
-            @context.Icon
-            @context.Name
+            <FluentStack Style="font-size: 25px; height: 25px;">
+                <FluentStack Style="width: 25px">
+                    @context.Icon
+                </FluentStack>
+                @context.Name
+            </FluentStack>
         </OptionTemplate>
     </FluentListbox>
     <p>

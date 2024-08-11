@@ -1,0 +1,52 @@
+﻿@using AndOS.Application.Components
+@using Microsoft.Extensions.Logging
+@inherits BaseProgramComponent
+@namespace AndOS.Module.VideoPlayer
+@inject ILogger<VideoPlayerComponent> Logger
+
+@{
+    base.BuildRenderTree(__builder);
+}
+
+<BlazoredVideo @ref="PlayerRef" class="w-100" style="width:100px; height: 100%" controls="controls" controlsList="nofullscreen" Play="OnPlay">
+    <source />
+</BlazoredVideo>
+
+@code {
+    Dictionary<string, object> currentArgs = [];
+    public BlazoredVideo PlayerRef { get; set; }
+
+    void OnPlay(VideoState state)
+    {
+
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        currentArgs = Arguments;
+        return base.OnInitializedAsync();
+    }
+
+    protected override async Task OnUpdateArguments(Dictionary<string, object> arguments)
+    {
+        foreach (var arg in arguments)
+        {
+            switch (arg.Key)
+            {
+                case "FileId":
+                    await PlayFromFileId((Guid)arg.Value);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    async Task PlayFromFileId(Guid fileId)
+    {
+        var result = await FileService.GetByIdAsync(new(fileId));
+        await PlayerRef.PausePlayback();
+        await PlayerRef.SetSrcAsync(result.Url);        
+        await PlayerRef.StartPlayback();
+    }
+}

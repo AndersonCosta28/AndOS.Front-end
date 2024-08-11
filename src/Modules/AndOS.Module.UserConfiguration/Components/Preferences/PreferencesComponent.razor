@@ -4,7 +4,7 @@
 @inject NavigationManager NavManager
 @inject ILogger<PreferencesComponent> Logger
 @inherits AndOSBaseComponent
-@namespace AndOS.Module.UserConfiguration.Preferences
+@namespace AndOS.Module.UserConfiguration.Components.Preferences
 
 <FluentButton OnClick="create">
     <BlazorBootstrap.Icon Name="BlazorBootstrap.IconName.PlusCircle" />
@@ -53,22 +53,24 @@
 
     async Task create()
     {
-        var dialog = await DialogService.ShowDialogAsync<DialogCreate>(new()
+        DialogParameters parameters = new()
             {
                 Width = "25vw",
                 Height = "60vh",
                 OnDialogClosing = EventCallback.Factory.Create<DialogInstance>(this, async (instance) => { await refreshGrid(); })
-            });
+            };
+        var dialog = await DialogService.ShowDialogAsync<DialogCreate>(parameters);            
     }
 
     async Task edit(DefaultProgramToExtensionDTO item)
     {
-        await DialogService.ShowDialogAsync<DialogUpdate>(item, new()
+        DialogParameters parameters = new()
             {
                 Width = "25vw",
                 Height = "60vh",
                 OnDialogClosing = EventCallback.Factory.Create<DialogInstance>(this, async (instance) =>{ await refreshGrid(); })
-            });
+            };
+        await DialogService.ShowDialogAsync<DialogUpdate>(item, parameters);
     }
 
     async Task delete(DefaultProgramToExtensionDTO item)

@@ -1,8 +1,10 @@
 ﻿@using AndOS.Core.Enums
 @using AndOS.Shared.Requests.Files.Create
+@using Microsoft.FluentUI.AspNetCore.Components
 @inject ILogger<NotepadComponent> Logger
 @inject ICloudStorageServiceFactory CloudStorageServiceFactory
 @inject IFileExplorerDialogs FileExplorerDialogs
+@inject IToastService ToastService
 @inherits BaseProgramComponent
 @namespace AndOS.Module.Notepad
 
@@ -75,10 +77,12 @@
         await OpenAsync(fileId);
     }
 
-
     async Task SaveAsync()
     {
-        await FileService.SaveAsync(Content, CurrentCloudStorage, text);
+        var response = await FileService.UpdateContentFileAsync(new(id: Content.Id));
+        var service = CloudStorageServiceFactory.Create(CurrentCloudStorage);
+        await service.UploadAsync(response.Url, text, null);
+        ToastService.ShowSuccess("File saved successfully");
     }
 
     async Task SaveAsAsync()

@@ -1,7 +1,15 @@
 ﻿@inject IProgramManager ProgramManager
 @implements IDisposable
 @namespace AndOS.Web.Components.Programs
-<div style="padding: 10px"> 
+<div style="
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    overflow: hidden auto;
+    height: inherit;
+    gap: 10px;
+    align-content: flex-start;"
+>
     @foreach (var program in ProgramManager.Programs)
     {
         <ProgramItem Content="program" @key=program />

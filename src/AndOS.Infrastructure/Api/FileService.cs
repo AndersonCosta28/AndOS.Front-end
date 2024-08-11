@@ -1,4 +1,5 @@
 ﻿using AndOS.Application.Extensions;
+using AndOS.Application.Interfaces.Params;
 using AndOS.Shared.Requests.Files.Create;
 using AndOS.Shared.Requests.Files.Delete;
 using AndOS.Shared.Requests.Files.Get.GetById;
@@ -71,24 +72,24 @@ internal class FileService(HttpClient httpClient,
         return result;
     }
 
-    public async Task SaveAsync(FileDTO file, AndOS.Core.Enums.CloudStorage cloudStorage, string content, CancellationToken cancellationToken = default)
+    public async Task SaveAsync(SaveFileParams param, CancellationToken cancellationToken = default)
     {
         try
         {
             string url;
-            if (file.Id == Guid.Empty)
+            if (param.Id == null || param.Id == Guid.Empty)
             {
-                var response = await CreateAsync(new(extension: file.Extension, name: file.Name, parentFolderId: file.ParentFolder.Id, size: file.Size), cancellationToken);
+                var response = await CreateAsync(new(extension: param.Extension, name: param.Name, parentFolderId: param.ParentFolderId, size: param.Content.Length.ToString()), cancellationToken);
                 url = response.Url;
             }
             else
             {
-                var response = await UpdateContentFileAsync(new(id: file.Id), cancellationToken);
+                var response = await UpdateContentFileAsync(new(id: (Guid)param.Id), cancellationToken);
                 url = response.Url;
             }
 
-            var service = cloudStorageServiceFactory.Create(cloudStorage);
-            await service.UploadAsync(url, content, null, cancellationToken);
+            var service = cloudStorageServiceFactory.Create(param.CloudStorage);
+            await service.UploadAsync(url, param.Content, null, cancellationToken);
             toastService.ShowSuccess("File saved successfully");
         }
         catch (Exception ex)

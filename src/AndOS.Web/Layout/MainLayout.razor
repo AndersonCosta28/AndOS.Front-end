@@ -1,22 +1,29 @@
-﻿@using AndOS.Web.Components.TopBar
+﻿@using AndOS.Web.Components
 @using Microsoft.AspNetCore.Components
 @using System.Reflection
 @inherits LayoutComponentBase
 @inject IContextMenuManager ContextMenuManager
 
 <div id="main_layout_container">
-    <TopBar></TopBar>
-    @Body
-    <TaskBar/>
-    <FluentToastProvider MaxToastCount="10" />
-    <FluentDialogProvider />
-    <FluentMenu Style="position: fixed" @bind-Open="ContextMenuManager.Open" @ref=fluentMenuRef Trigger="MouseButton.Right" Anchored="false">
-        @foreach (var item in ContextMenuManager.GetItems())
-        {
-            <AndOS.Application.Components.RecursiveMenuComponent RootMenuItem="item" />
-        }
-    </FluentMenu>
+    <div style="height: 48px; flex-shrink: 0;">
+        <TopBar />
+    </div>
+    <div style="flex-grow: 1; overflow: hidden">
+        @Body
+    </div>
+    <div style="height: var(--taskbar-height); flex-shrink: 0;">
+        <TaskBar />
+    </div>
 </div>
+<FluentToastProvider MaxToastCount="10" />
+<FluentDialogProvider />
+<FluentMenu Style="position: fixed" @bind-Open="ContextMenuManager.Open" @ref=fluentMenuRef
+            Trigger="MouseButton.Right" Anchored="false">
+    @foreach (var item in ContextMenuManager.GetItems())
+    {
+        <AndOS.Application.Components.RecursiveMenuComponent RootMenuItem="item" />
+    }
+</FluentMenu>
 
 @code {
     FluentMenu fluentMenuRef;

@@ -1,12 +1,12 @@
 ﻿using AndOS.Application.Extensions;
 using AndOS.Domain.Consts;
 using AndOS.Infrastructure.Authentication;
-using AndOS.Shared.Requests.Auth;
+using AndOS.Shared.Requests.Auth.Login;
+using AndOS.Shared.Requests.Auth.Register;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 
 namespace AndOS.Infrastructure.Api;
 
@@ -21,20 +21,17 @@ public class AuthenticationService(
 
     public async Task Login(string email, string password, CancellationToken cancellationToken = default)
     {
-        HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{_endpoint}/login", new LoginRequest() { Email = email, Password = password });
+        var response = await httpClient.PostAsJsonAsync($"{_endpoint}/login", new LoginRequest() { Email = email, Password = password });
         response.EnsureSuccessStatusCode();
-
-        // Extrai o token JWT da resposta
-        var token = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        // Armazena o token no local storage
-        await localStorage.SetItemAsync("authToken", token);
+        var responseLogin = await response.Content.ReadFromJsonAsync<LoginResponse>(cancellationToken);
+        
+        await localStorage.SetItemAsync("authToken", responseLogin.Token, cancellationToken);
 
         // Notifica o AuthenticationStateProvider sobre a autenticação do usuário
-        authenticationStateProvider.NotifyUserAuthentication(token);
+        authenticationStateProvider.NotifyUserAuthentication(responseLogin.Token);
 
         // Configura o HttpClient para incluir o token JWT em todas as requisições subsequentes
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", responseLogin.Token);
 
         logger.Log(LogLevel.Debug, "Redirecionando para a página de bem-vindo");
         navigationManager.NavigateTo(Routes.Welcome, true, true);

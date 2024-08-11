@@ -1,8 +1,5 @@
 ﻿using AndOS.Domain.Consts;
 using AndOS.Domain.Enums;
-using AndOS.Module.FileExplorer;
-using AndOS.Module.Notepad;
-using AndOS.Module.UserConfiguration;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 
@@ -17,9 +14,11 @@ internal class ProgramManager : IProgramManager
     {
         _logger = logger;
         this._assemblyManager = assemblyManager;
-        _programs.Add(new FileExplorer());
-        _programs.Add(new Notepad());
-        _programs.Add(new UserConfiguration());
+        _programs.Add(new Module.FileExplorer.FileExplorer());
+        _programs.Add(new Module.Notepad.Notepad());
+        _programs.Add(new Module.UserConfiguration.UserConfiguration());
+        _programs.Add(new Module.VideoPlayer.VideoPlayer());
+        _programs.Add(new Module.MusicPlayer.MusicPlayer());
     }
 
     private readonly List<Assembly> _assemblies = [];
