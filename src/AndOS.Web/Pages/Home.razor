@@ -6,9 +6,9 @@
 @code {
     Task ToLogin()
     {
-        NavigationManager.NavigateTo(Routes.Login);
+        NavigationManager.NavigateTo(RoutesConsts.Login);
         return Task.CompletedTask;
     }
 
-    protected override void OnInitialized() => NavigationManager.NavigateTo(Routes.Login);
+    protected override void OnInitialized() => NavigationManager.NavigateTo(RoutesConsts.Login);
 }

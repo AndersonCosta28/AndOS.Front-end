@@ -24,7 +24,7 @@
 
 </FluentDialogHeader>
 <FluentDialogBody>
-    <FluentInputFile MaximumFileCount="1" MaximumFileSize="@(oneMegaByte * 50)" @ref="@UploadProgram"
+    <FluentInputFile MaximumFileCount="1" MaximumFileSize="@(FileSizeConsts.Megagabyte * 50)" @ref="@UploadProgram"
         DragDropZoneVisible="false" AnchorId="UploadProgram" Mode="InputFileMode.Stream" OnProgressChange="@(e =>
                      {
                          progressPercent = e.ProgressPercent;
@@ -69,8 +69,6 @@
     int progressPercent;
     string progressTitle;
     IQueryable<FileLoaded> Files = Array.Empty<FileLoaded>().AsQueryable();
-    long oneGigabyte = 1073741824;
-    long oneMegaByte = 1048576;
     async Task Submit()
     {
         try
@@ -122,8 +120,8 @@
 
     string FormatFileSize(long fileSize) => fileSize switch
     {
-        >= 1073741824 => $"{(double)fileSize / 1073741824:F2} GB",
-        >= 1048576 => $"{(double)fileSize / 1048576:F2} MB",
+        >= FileSizeConsts.Gigabyte => $"{fileSize / FileSizeConsts.Gigabyte} GB",
+        >= FileSizeConsts.Megagabyte => $"{fileSize / FileSizeConsts.Megagabyte} MB",
         _ => $"{fileSize} KB"
     };
 

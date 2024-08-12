@@ -34,7 +34,7 @@ public class AuthenticationService(
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", responseLogin.Token);
 
         logger.Log(LogLevel.Debug, "Redirecionando para a página de bem-vindo");
-        navigationManager.NavigateTo(Routes.Welcome, true, true);
+        navigationManager.NavigateTo(RoutesConsts.Welcome, true, true);
     }
 
     public async Task Register(string email, string userName, string password, string confirmPassword, CancellationToken cancellationToken = default)
@@ -49,7 +49,7 @@ public class AuthenticationService(
         var request = new RegisterRequest() { Email = email, Password = password, UserName = userName };
         HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{_endpoint}/register", request, cancellationToken: cancellationToken);
         await response.HandleResponse(cancellationToken);
-        navigationManager.NavigateTo(Routes.Login);
+        navigationManager.NavigateTo(RoutesConsts.Login);
     }
 
     public async Task Logout()
@@ -60,7 +60,7 @@ public class AuthenticationService(
         // Notifica o AuthenticationStateProvider sobre o logout do usuário
         authenticationStateProvider.NotifyUserLogout();
 
-        navigationManager.NavigateTo(Routes.Login);
+        navigationManager.NavigateTo(RoutesConsts.Login);
 
         // Remove o cabeçalho de autorização do HttpClient
         httpClient.DefaultRequestHeaders.Authorization = null;

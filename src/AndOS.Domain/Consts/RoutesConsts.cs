@@ -1,6 +1,6 @@
 namespace AndOS.Domain.Consts;
 
-public static class Routes
+public static class RoutesConsts
 {
     public const string Home = "";
     public const string Login = "/Login";

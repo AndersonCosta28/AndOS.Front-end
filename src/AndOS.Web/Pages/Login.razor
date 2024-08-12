@@ -32,11 +32,11 @@
         var token = await LocalStorage.GetItemAsync<string>("authToken");
         if (string.IsNullOrWhiteSpace(token))
             return;
-        NavigationManager.NavigateTo(Routes.Welcome, true, true);
+        NavigationManager.NavigateTo(RoutesConsts.Welcome, true, true);
     }
     private void GoToRegister()
     {
-        NavigationManager.NavigateTo(Routes.Register);
+        NavigationManager.NavigateTo(RoutesConsts.Register);
     }
 
     private async Task HandleValidSubmit()
