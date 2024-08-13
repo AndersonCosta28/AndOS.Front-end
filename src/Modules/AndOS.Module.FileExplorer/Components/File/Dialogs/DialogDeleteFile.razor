@@ -11,7 +11,7 @@
     <FluentLabel Typo="Typography.H4">Delete file</FluentLabel>
 </FluentDialogHeader>
 <FluentDialogBody>
-    <p>Confirm delete file <b>@Content.Name</b></p>
+    <p>Confirm delete file <b>@(Content.Name).@(Content.Extension)</b></p>
 </FluentDialogBody>
 <FluentDialogFooter>
     <FluentButton Loading=loading Appearance=Appearance.Accent OnClick="Delete">Yes</FluentButton>

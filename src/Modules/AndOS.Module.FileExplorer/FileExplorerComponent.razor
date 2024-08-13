@@ -235,7 +235,8 @@
     {
         DialogParameters dialogParameters = new()
             {
-                Width = "600px"
+                Width = "80vw",
+                Height = "80vh"
             };
         var data = new AddFileFromDiskParam(ContentFolder.Id);
         var dialog = await DialogService.ShowDialogAsync<DialogAddFileFromDisk>(data, dialogParameters);

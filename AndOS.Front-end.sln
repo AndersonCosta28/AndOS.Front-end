@@ -25,9 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AndOS.Module.Notepad", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AndOS.Module.UserConfiguration", "src\Modules\AndOS.Module.UserConfiguration\AndOS.Module.UserConfiguration.csproj", "{A7483B00-0572-473F-8C74-EBE555932CFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndOS.Module.VideoPlayer", "src\Modules\AndOS.Module.VideoPlayer\AndOS.Module.VideoPlayer.csproj", "{FE982E51-CBDF-48B1-92B8-C98C9E9CD980}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AndOS.Module.VideoPlayer", "src\Modules\AndOS.Module.VideoPlayer\AndOS.Module.VideoPlayer.csproj", "{FE982E51-CBDF-48B1-92B8-C98C9E9CD980}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndOS.Module.MusicPlayer", "src\Modules\AndOS.Module.MusicPlayer\AndOS.Module.MusicPlayer.csproj", "{EB9455B5-6B44-4386-B57D-6A3C7C7CE1D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AndOS.Module.MusicPlayer", "src\Modules\AndOS.Module.MusicPlayer\AndOS.Module.MusicPlayer.csproj", "{EB9455B5-6B44-4386-B57D-6A3C7C7CE1D5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

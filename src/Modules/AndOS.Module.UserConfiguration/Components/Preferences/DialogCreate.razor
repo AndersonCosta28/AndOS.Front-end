@@ -17,11 +17,19 @@
 
 <FluentDialogBody Style="overflow: auto;">
     <FluentStack Orientation="Orientation.Vertical">
-        <FluentTextField @bind-Value=@Extension Name="Extension" Label="Extension" Pattern="@FileSchema.RegexExtension"
-                         Minlength="@FileSchema.MinLenghtName" Maxlength="@FileSchema.MaxLenghtName" Style="width: 50%" />
-        <FluentSelect Label="Program" TOption=Program Items="ProgramManager.Programs"
-                      OptionText="@(v => v.Name)" OptionValue="@(v => v.Name)"
-                      @bind-SelectedOption=@Program />
+        <FluentTextField @bind-Value=@Extension
+                         Name="Extension"
+                         Label="Extension"
+                         Pattern="@FileSchema.RegexExtension"
+                         Minlength="@FileSchema.MinLenghtName"
+                         Maxlength="@FileSchema.MaxLenghtName"
+                         Style="width: 100%" />
+        <FluentSelect Label="Program"
+                      TOption=Program Items="ProgramManager.Programs"
+                      OptionText="@(v => v.Name)"
+                      OptionValue="@(v => v.Name)"
+                      @bind-SelectedOption=@Program
+                      Style="width: 100%" />
     </FluentStack>
 </FluentDialogBody>
 

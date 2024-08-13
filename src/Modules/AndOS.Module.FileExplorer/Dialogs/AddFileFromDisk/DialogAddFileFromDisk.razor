@@ -8,6 +8,7 @@
 @inject IDialogService IDialogService
 @inject ICloudStorageServiceFactory CloudStorageServiceFactory
 @inject IFileService FileService
+@inject IDialogService DialogService
 @implements IDialogContentComponent<AddFileFromDiskParam>
 
 <FluentDialogHeader>
@@ -15,9 +16,11 @@
     <FluentLabel Typo="Typography.H4">Warming:</FluentLabel>
     <ul>
         <li>
-            <FluentLabel Typo="Typography.Body">Currently, this feature only supports attaching one file at a time.
+            <FluentLabel Typo="Typography.Body">
+                Currently, this feature only supports attaching one file at a time.
                 Please
-                select the desired file and try again.</FluentLabel>
+                select the desired file and try again.
+            </FluentLabel>
         </li>
         <li>Maximum file size is 50 megabytes</li>
     </ul>
@@ -25,7 +28,7 @@
 </FluentDialogHeader>
 <FluentDialogBody>
     <FluentInputFile MaximumFileCount="1" MaximumFileSize="@(FileSizeConsts.Megagabyte * 50)" @ref="@UploadProgram"
-        DragDropZoneVisible="false" AnchorId="UploadProgram" Mode="InputFileMode.Stream" OnProgressChange="@(e =>
+                     DragDropZoneVisible="false" AnchorId="UploadProgram" Mode="InputFileMode.Stream" OnProgressChange="@(e =>
                      {
                          progressPercent = e.ProgressPercent;
                          progressTitle = e.ProgressTitle;
@@ -39,21 +42,23 @@
         Upload files
     </FluentButton>
 
+
     @if (Files.Any())
     {
         <FluentLabel Typo="Typography.H4">File(s) uploaded:</FluentLabel>
-        <FluentDataGrid Items="Files">
+        <FluentDataGrid Items="Files.AsQueryable()" @ref=grid>
+            @* <PropertyColumn Title="Name" Sortable="true" Property="@(p => p.Name)" /> *@
             <TemplateColumn Title="Name" Sortable="true">
                 <FluentTextField @bind-Value="context.Name" Required Pattern=FileSchema.RegexName
-                    Minlength="FileSchema.MinLenghtName" Maxlength="FileSchema.MaxLenghtName" />
+                                 Minlength="FileSchema.MinLenghtName" Maxlength="FileSchema.MaxLenghtName" />
             </TemplateColumn>
-            <TemplateColumn Title="Extension" Sortable="true">
+             <TemplateColumn Title="Extension" Sortable="true">
                 <FluentTextField @bind-Value="context.Extension" Pattern="@FileSchema.RegexExtension"
-                    Minlength="FileSchema.MinLenghtExtension" Maxlength="FileSchema.MaxLenghtExtension" />
-            </TemplateColumn>
+                                 Minlength="FileSchema.MinLenghtExtension" Maxlength="FileSchema.MaxLenghtExtension" />            </TemplateColumn>
             <PropertyColumn Title="Size" Property="@(p => FormatFileSize(p.File.Size))" Sortable="true" />
-            <TemplateColumn Title="Error" Sortable="true">
-                @context.File.ErrorMessage
+            <TemplateColumn Title="Error" Sortable="true">@context.File.ErrorMessage</TemplateColumn>
+            <TemplateColumn Title="Actions">
+                <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())" OnClick="@(async () => await delete(context))" />
             </TemplateColumn>
         </FluentDataGrid>
     }
@@ -62,13 +67,14 @@
     <FluentButton OnClick="Submit" Loading="@loading" Disabled="!Files.Any()">Ok</FluentButton>
 </FluentDialogFooter>
 @code {
+    FluentDataGrid<FileLoaded> grid { get; set; }
     [CascadingParameter] public FluentDialog Dialog { get; set; }
     [Parameter] public AddFileFromDiskParam Content { get; set; }
     FluentInputFile UploadProgram = default!;
     bool loading = false;
     int progressPercent;
     string progressTitle;
-    IQueryable<FileLoaded> Files = Array.Empty<FileLoaded>().AsQueryable();
+    List<FileLoaded> Files = [];
     async Task Submit()
     {
         try
@@ -78,6 +84,7 @@
             var file = Files.First();
             var data = file.File.Stream;
             var length = data.Length;
+
             var result = await FileService.CreateAsync(new(
                 name: file.Name,
                 extension: file.Extension,
@@ -110,7 +117,7 @@
 
     void OnCompleted(IEnumerable<FluentInputFileEventArgs> files)
     {
-        Files = files.Select(x => new FileLoaded(x)).AsQueryable();
+        Files = files.Select(x => new FileLoaded(x)).ToList();
         if (Files.Count() == 0)
             return;
         progressPercent = UploadProgram!.ProgressPercent;
@@ -125,10 +132,34 @@
         _ => $"{fileSize} KB"
     };
 
-    class FileLoaded(FluentInputFileEventArgs file)
+    async Task delete(FileLoaded item)
     {
-        public string Name { get; set; } = Path.GetFileNameWithoutExtension(file.Name);
-        public string Extension { get; set; } = Path.GetExtension(file.Name)[1..];
-        public FluentInputFileEventArgs File { get; set; } = file;
+        Files = Files.Where(x => x.Id != item.Id).ToList();
+        await refreshGrid();
+    }
+
+    async Task refreshGrid()
+    {
+        Logger.Log(LogLevel.Debug, "{0} called", nameof(refreshGrid));
+        grid.SetLoadingState(true);
+        // grid.Items = Files;
+        await grid!.RefreshDataAsync();
+        grid.SetLoadingState(false);
+    }
+
+    class FileLoaded
+    {
+        public FileLoaded(FluentInputFileEventArgs file)
+        {
+            Id = Guid.NewGuid();
+            Name = Path.GetFileNameWithoutExtension(file.Name);
+            Extension = Path.GetExtension(file.Name)[1..];
+            File = file;
+        }
+
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public string Extension { get; set; }
+        public FluentInputFileEventArgs File { get; set; }
     }
 }
