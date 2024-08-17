@@ -19,6 +19,7 @@ internal class ProgramManager : IProgramManager
         _programs.Add(new Module.UserConfiguration.UserConfiguration());
         _programs.Add(new Module.VideoPlayer.VideoPlayer());
         _programs.Add(new Module.MusicPlayer.MusicPlayer());
+        _programs.Add(new Module.ImageViewer.ImageViewer());
     }
 
     private readonly List<Assembly> _assemblies = [];

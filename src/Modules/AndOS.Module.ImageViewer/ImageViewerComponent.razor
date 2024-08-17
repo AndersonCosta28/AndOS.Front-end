@@ -1,0 +1,65 @@
+﻿@using AndOS.Application.Components
+@using Microsoft.Extensions.Logging
+@using Microsoft.FluentUI.AspNetCore.Components
+@inherits BaseProgramComponent
+@namespace AndOS.Module.ImageViewer
+@inject ILogger<ImageViewerComponent> Logger
+
+@{
+    base.BuildRenderTree(__builder);
+}
+@if (Loading)
+{
+    <FluentStack HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center" Style="width:100%; height: 100%">
+        <FluentProgressRing />
+    </FluentStack>
+}
+else
+{
+    <img src="@Source" style="width: 100%; height: 100%; object-fit: contain;" />
+}
+
+@code {
+    Dictionary<string, object> currentArgs = [];
+    public string Source { get; set; }
+    public bool Loading { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        currentArgs = Arguments;
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnUpdateArguments(Dictionary<string, object> arguments)
+    {
+        foreach (var arg in arguments)
+        {
+            switch (arg.Key)
+            {
+                case "FileId":
+                    await ViewImageFileId((Guid)arg.Value);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    async Task ViewImageFileId(Guid fileId)
+    {
+        try
+        {
+            Loading = true;
+            var result = await FileService.GetByIdAsync(new(fileId));
+            Source = result.Url;
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, e.Message);
+            ToastService.ShowError(e.Message);
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+}

@@ -46,15 +46,16 @@
     @if (Files.Any())
     {
         <FluentLabel Typo="Typography.H4">File(s) uploaded:</FluentLabel>
-        <FluentDataGrid Items="Files.AsQueryable()" @ref=grid>
+        <FluentDataGrid Items="Files.AsQueryable()" @ref=grid GridTemplateColumns="1fr 0.3fr 0.5fr 1fr 0.3fr" ResizableColumns=true ResizeType="DataGridResizeType.Discrete">
             @* <PropertyColumn Title="Name" Sortable="true" Property="@(p => p.Name)" /> *@
             <TemplateColumn Title="Name" Sortable="true">
                 <FluentTextField @bind-Value="context.Name" Required Pattern=FileSchema.RegexName
-                                 Minlength="FileSchema.MinLenghtName" Maxlength="FileSchema.MaxLenghtName" />
+                                 Minlength="FileSchema.MinLenghtName" Maxlength="FileSchema.MaxLenghtName" Style="width: 100%" />
             </TemplateColumn>
-             <TemplateColumn Title="Extension" Sortable="true">
+            <TemplateColumn Title="Extension" Sortable="true">
                 <FluentTextField @bind-Value="context.Extension" Pattern="@FileSchema.RegexExtension"
-                                 Minlength="FileSchema.MinLenghtExtension" Maxlength="FileSchema.MaxLenghtExtension" />            </TemplateColumn>
+                                 Minlength="FileSchema.MinLenghtExtension" Maxlength="FileSchema.MaxLenghtExtension" Style="width: 100%" />
+            </TemplateColumn>
             <PropertyColumn Title="Size" Property="@(p => FormatFileSize(p.File.Size))" Sortable="true" />
             <TemplateColumn Title="Error" Sortable="true">@context.File.ErrorMessage</TemplateColumn>
             <TemplateColumn Title="Actions">

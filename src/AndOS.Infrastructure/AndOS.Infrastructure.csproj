@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AndOS.Application\AndOS.Application.csproj" />
     <ProjectReference Include="..\Modules\AndOS.Module.FileExplorer\AndOS.Module.FileExplorer.csproj" />
+    <ProjectReference Include="..\Modules\AndOS.Module.ImageViewer\AndOS.Module.ImageViewer.csproj" />
     <ProjectReference Include="..\Modules\AndOS.Module.Notepad\AndOS.Module.Notepad.csproj" />
     <ProjectReference Include="..\Modules\AndOS.Module.UserConfiguration\AndOS.Module.UserConfiguration.csproj" />
     <ProjectReference Include="..\Modules\AndOS.Module.VideoPlayer\AndOS.Module.VideoPlayer.csproj" />
