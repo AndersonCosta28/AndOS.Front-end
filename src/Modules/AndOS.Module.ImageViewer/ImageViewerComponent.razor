@@ -8,16 +8,7 @@
 @{
     base.BuildRenderTree(__builder);
 }
-@if (Loading)
-{
-    <FluentStack HorizontalAlignment="HorizontalAlignment.Center" VerticalAlignment="VerticalAlignment.Center" Style="width:100%; height: 100%">
-        <FluentProgressRing />
-    </FluentStack>
-}
-else
-{
-    <img src="@Source" style="width: 100%; height: 100%; object-fit: contain;" />
-}
+<img src="@Source" style="width: 100%; height: 100%; object-fit: contain;" />
 
 @code {
     Dictionary<string, object> currentArgs = [];
@@ -51,6 +42,7 @@ else
             Loading = true;
             var result = await FileService.GetByIdAsync(new(fileId));
             Source = result.Url;
+            await refreshAsync();
         }
         catch (Exception e)
         {

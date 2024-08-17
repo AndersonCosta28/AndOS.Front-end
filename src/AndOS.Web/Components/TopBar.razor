@@ -41,7 +41,7 @@
 
     async Task OpenUserConfiguration()
     {
-        var program = ProgramManager.Programs.First(x => x.GetType() == typeof(UserConfigurationComponent));
+        var program = ProgramManager.Programs.First(x => x.GetType() == typeof(UserConfiguration));
         await ProcessManager.StartAsync(program);
     }
 }
