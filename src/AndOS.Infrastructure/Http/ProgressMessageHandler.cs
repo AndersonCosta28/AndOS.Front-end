@@ -1,16 +1,16 @@
 ﻿namespace AndOS.Infrastructure.Http;
 public class ProgressMessageHandler : DelegatingHandler
 {
-    Action<long, long> _progressCallBackDefault = (progress, total) => Console.WriteLine($"Download progress: {progress} bytes / {total} bytes");
+    readonly Action<long, long> _progressCallBackDefault = (progress, total) => Console.WriteLine($"Download progress: {progress} bytes / {total} bytes");
 
     private readonly Action<long, long> _onProgress;
 
     public ProgressMessageHandler(Action<long, long> onProgress = default) : base(new HttpClientHandler())
     {
         if (onProgress == default)
-            _onProgress = _progressCallBackDefault;
+            this._onProgress = this._progressCallBackDefault;
         else
-            _onProgress = onProgress;
+            this._onProgress = onProgress;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -26,10 +26,10 @@ public class ProgressMessageHandler : DelegatingHandler
 
             using var contentStream = await request.Content.ReadAsStreamAsync();
             using var outputStream = new MemoryStream();
-            await contentStream.CopyToAsync(    outputStream, 4096, cancellationToken);
+            await contentStream.CopyToAsync(outputStream, 4096, cancellationToken);
             totalBytesSent = outputStream.Length;
 
-            _onProgress(totalBytesSent, contentLength);
+            this._onProgress(totalBytesSent, contentLength);
         }
 
         // Simulação de download
@@ -43,7 +43,7 @@ public class ProgressMessageHandler : DelegatingHandler
             await responseStream.CopyToAsync(inputStream, 4096, cancellationToken);
             totalBytesReceived = inputStream.Length;
 
-            _onProgress(totalBytesReceived, contentLength);
+            this._onProgress(totalBytesReceived, contentLength);
         }
 
         return response;

@@ -4,8 +4,8 @@ public struct Dimensions
 {
     public Dimensions(decimal x, decimal y)
     {
-        X = x;
-        Y = y;
+        this.X = x;
+        this.Y = y;
     }
 
     public decimal X { get; set; }

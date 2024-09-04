@@ -14,9 +14,9 @@ public class OpenFolderByPath : IOpenFolderParams
         bool clearNavigationHistory = false,
         bool clearFowardHistory = false)
     {
-        Path = path;
-        NavigationType = navigationType;
-        ClearNavigationHistory = clearNavigationHistory;
-        ClearFowardHistory = clearFowardHistory;
+        this.Path = path;
+        this.NavigationType = navigationType;
+        this.ClearNavigationHistory = clearNavigationHistory;
+        this.ClearFowardHistory = clearFowardHistory;
     }
 }

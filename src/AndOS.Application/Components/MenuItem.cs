@@ -5,9 +5,9 @@ public class MenuItem
     public string Label { get; }
     public Func<Task> OnClick { get; }
     public List<MenuItem> SubMenuItems { get; } = [];
-    public bool Checked => CallBackChecked().Result;
-    public bool Disable => CallBackDisabled().Result;
-    public bool Visible => CallBackVisible().Result;
+    public bool Checked => this.CallBackChecked().Result;
+    public bool Disable => this.CallBackDisabled().Result;
+    public bool Visible => this.CallBackVisible().Result;
     private Func<Task<bool>> CallBackChecked { get; } = () => Task.FromResult(false);
     private Func<Task<bool>> CallBackDisabled { get; } = () => Task.FromResult(false);
     private Func<Task<bool>> CallBackVisible { get; } = () => Task.FromResult(true);
@@ -20,17 +20,17 @@ public class MenuItem
     {
         if (onClick is null)
             throw new Exception("Action cannot be null");
-        Label = label;
-        OnClick = onClick;
+        this.Label = label;
+        this.OnClick = onClick;
 
         if (callBackChecked is not null)
-            CallBackChecked = callBackChecked;
+            this.CallBackChecked = callBackChecked;
 
         if (callBackDisabled is not null)
-            CallBackDisabled = callBackDisabled;
+            this.CallBackDisabled = callBackDisabled;
 
         if (callBackVisible is not null)
-            CallBackVisible = callBackVisible;
+            this.CallBackVisible = callBackVisible;
     }
 
     public MenuItem(string label, List<MenuItem> subMenuItems)
@@ -38,7 +38,7 @@ public class MenuItem
         if (subMenuItems is null || subMenuItems.Count == 0)
             throw new Exception("You must have at least 1 item");
 
-        Label = label;
-        SubMenuItems = subMenuItems;
+        this.Label = label;
+        this.SubMenuItems = subMenuItems;
     }
 }

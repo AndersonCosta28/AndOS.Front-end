@@ -1,13 +1,10 @@
 ﻿using AndOS.Application.Extensions;
-using AndOS.Application.Interfaces;
-using AndOS.Shared.DTOs;
 using AndOS.Shared.Requests.Accounts.Create;
 using AndOS.Shared.Requests.Accounts.Delete;
 using AndOS.Shared.Requests.Accounts.Get.GetAll;
 using AndOS.Shared.Requests.Accounts.Get.GetById;
 using AndOS.Shared.Requests.Accounts.Get.GetConfigByAccountId;
 using AndOS.Shared.Requests.Accounts.Update;
-using System.Net.Http.Json;
 
 namespace AndOS.Infrastructure.Api;
 
@@ -21,7 +18,7 @@ public class AccountService(HttpClient httpClient) : IAccountService
 
     public async Task CreateAsync(CreateAccountRequest request, CancellationToken cancellationToken = default)
     {
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync(_endpoint, request, cancellationToken);
+        var response = await this._httpClient.PostAsJsonAsync(_endpoint, request, cancellationToken);
         await response.HandleResponse(cancellationToken);
         if (OnAccountCreated != null)
             await OnAccountCreated?.Invoke();
@@ -29,7 +26,7 @@ public class AccountService(HttpClient httpClient) : IAccountService
 
     public async Task DeleteAsync(DeleteAccountRequest request, CancellationToken cancellationToken = default)
     {
-        HttpResponseMessage response = await _httpClient.DeleteAsync($"{_endpoint}?{request.ToQueryString()}", cancellationToken);
+        var response = await this._httpClient.DeleteAsync($"{_endpoint}?{request.ToQueryString()}", cancellationToken);
         await response.HandleResponse(cancellationToken);
         if (OnAccountDeleted != null)
             await OnAccountDeleted?.Invoke();
@@ -37,7 +34,7 @@ public class AccountService(HttpClient httpClient) : IAccountService
 
     public async Task<List<AccountDTO>> GetAllAsync(GetAllAccontsRequest _, CancellationToken cancellationToken = default)
     {
-        HttpResponseMessage response = await _httpClient.GetAsync($"{_endpoint}", cancellationToken);
+        var response = await this._httpClient.GetAsync($"{_endpoint}", cancellationToken);
         await response.HandleResponse(cancellationToken);
         var result = await response.Content.ReadFromJsonAsync<List<AccountDTO>>();
         return result;
@@ -45,7 +42,7 @@ public class AccountService(HttpClient httpClient) : IAccountService
 
     public async Task<GetAccountByIdResponse> GetByIdAsync(GetAccountByIdRequest request, CancellationToken cancellationToken = default)
     {
-        HttpResponseMessage response = await _httpClient.GetAsync($"{_endpoint}/GetById?{request.ToQueryString()}", cancellationToken);
+        var response = await this._httpClient.GetAsync($"{_endpoint}/GetById?{request.ToQueryString()}", cancellationToken);
         await response.HandleResponse(cancellationToken);
         var result = await response.Content.ReadFromJsonAsync<GetAccountByIdResponse>(cancellationToken: cancellationToken);
         return result;
@@ -53,7 +50,7 @@ public class AccountService(HttpClient httpClient) : IAccountService
 
     public async Task UpdateAsync(UpdateAccountRequest request, CancellationToken cancellationToken = default)
     {
-        HttpResponseMessage response = await _httpClient.PutAsJsonAsync(_endpoint, request, cancellationToken);
+        var response = await this._httpClient.PutAsJsonAsync(_endpoint, request, cancellationToken);
         await response.HandleResponse(cancellationToken);
         if (OnAccountUpdated != null)
             await OnAccountUpdated?.Invoke();
@@ -67,7 +64,7 @@ public class AccountService(HttpClient httpClient) : IAccountService
     public async Task<string> GetConfigAsync(GetConfigByAccountIdRequest request, CancellationToken cancellationToken = default)
     {
         var url = $"{_endpoint}/Config?{request.ToQueryString()}";
-        HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
+        var response = await this._httpClient.GetAsync(url, cancellationToken);
         await response.HandleResponse(cancellationToken);
         var result = await response.Content.ReadAsStringAsync(cancellationToken);
         return result;

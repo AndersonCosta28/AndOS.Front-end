@@ -7,9 +7,9 @@ public class ImageViewer : Program
 {
     public ImageViewer() : base()
     {
-        Name = "Imagem Viewer";
-        AllowMultipleInstances = false;
-        Icon = builder =>
+        this.Name = "Imagem Viewer";
+        this.AllowMultipleInstances = false;
+        this.Icon = builder =>
         {
             builder.OpenComponent<FluentIcon<Icons.Regular.Size20.Image>>(0);
             builder.AddAttribute(1, "Value", new Icons.Regular.Size20.Image());
@@ -18,7 +18,7 @@ public class ImageViewer : Program
             builder.AddAttribute(4, "CustomColor", "#333");
             builder.CloseComponent();
         };
-        Extensions = ["jpg", "png", "gif", "svg", "webp"];
-        ComponentType = typeof(ImageViewerComponent);
+        this.Extensions = ["jpg", "png", "gif", "svg", "webp"];
+        this.ComponentType = typeof(ImageViewerComponent);
     }
 }

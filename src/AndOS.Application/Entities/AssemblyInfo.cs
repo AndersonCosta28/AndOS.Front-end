@@ -6,9 +6,9 @@ public class AssemblyInfo
 
     public AssemblyInfo(string name, Version version, byte[] binary)
     {
-        Name = name;
-        Version = version;
-        Binary = binary;
+        this.Name = name;
+        this.Version = version;
+        this.Binary = binary;
     }
 
     public string Name { get; set; }

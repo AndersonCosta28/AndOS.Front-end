@@ -1,5 +1,4 @@
-﻿using AndOS.Application.Interfaces;
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AndOS.Infrastructure.Authentication;

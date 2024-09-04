@@ -5,9 +5,9 @@ public class FileExplorer : Program
 {
     public FileExplorer() : base()
     {
-        Name = "File explorer";
-        AllowMultipleInstances = true;
-        Icon = builder =>
+        this.Name = "File explorer";
+        this.AllowMultipleInstances = true;
+        this.Icon = builder =>
         {
             builder.OpenComponent<FluentIcon<Icons.Regular.Size20.FolderSearch>>(0);
             builder.AddAttribute(1, "Value", new Icons.Regular.Size20.FolderSearch()); // Substitua pelo ícone desejado
@@ -16,6 +16,6 @@ public class FileExplorer : Program
             builder.AddAttribute(4, "CustomColor", "#333");
             builder.CloseComponent();
         };
-        ComponentType = typeof(FileExplorerComponent);
+        this.ComponentType = typeof(FileExplorerComponent);
     }
 }

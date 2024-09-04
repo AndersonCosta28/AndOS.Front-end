@@ -1,10 +1,7 @@
 ﻿using AndOS.Application.Extensions;
-using AndOS.Application.Interfaces;
-using AndOS.Shared.DTOs;
 using AndOS.Shared.Requests.UserPreferences.Delete;
 using AndOS.Shared.Requests.UserPreferences.Get.GetDefaultProgramByExtension;
 using AndOS.Shared.Requests.UserPreferences.Update;
-using System.Net.Http.Json;
 
 namespace AndOS.Infrastructure.Api;
 

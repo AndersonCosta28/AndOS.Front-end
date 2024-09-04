@@ -6,7 +6,7 @@ namespace AndOS.Infrastructure.Managers;
 public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
 {
     #region Process
-    public List<Process> Processes => [.. _processes];
+    public List<Process> Processes => [.. this._processes];
     readonly ObservableCollection<Process> _processes = [];
     public event Func<Program, Dictionary<string, object>, Task> OnUpdateProgramArgumentsAsync;
 
@@ -16,11 +16,11 @@ public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
         {
             if (process.Window is Window)
             {
-                await destroyWindowAsync(process);
+                await this.destroyWindowAsync(process);
                 process.Window = null;
             }
             process.Program = null;
-            _processes.Remove(process);
+            this._processes.Remove(process);
         }
         catch (Exception ex)
         {
@@ -34,7 +34,7 @@ public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
         try
         {
             if (process.Window is Window)
-                await destroyWindowAsync(process);
+                await this.destroyWindowAsync(process);
         }
         catch (Exception ex)
         {
@@ -47,7 +47,7 @@ public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
     {
         try
         {
-            await instanceWindowAsync(process);
+            await this.instanceWindowAsync(process);
         }
         catch (Exception ex)
         {
@@ -62,26 +62,26 @@ public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
         {
             if (program.AllowMultipleInstances)
             {
-                await instanceProcess(program, arguments);
+                await this.instanceProcess(program, arguments);
                 return;
             }
             else
             {
                 var type = program.GetType();
-                var process = Processes.Find(x => x.Program.GetType() == type);
+                var process = this.Processes.Find(x => x.Program.GetType() == type);
 
                 if (process is Process)
                 {
                     if (process.Window is Window window)
-                        await FocusWindowAsync(window);
+                        await this.FocusWindowAsync(window);
                     else
-                        await RestoreFromTray(process);
+                        await this.RestoreFromTray(process);
 
                     if (OnUpdateProgramArgumentsAsync != null)
                         await OnUpdateProgramArgumentsAsync.Invoke(process.Program, arguments);
                 }
                 else
-                    process = await instanceProcess(program, arguments);
+                    process = await this.instanceProcess(program, arguments);
             }
         }
         catch (Exception ex)
@@ -96,10 +96,10 @@ public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
         var newInstance = (Program)Activator.CreateInstance(program.GetType());
 
         var process = new Process(newInstance);
-        _processes.Add(process);
+        this._processes.Add(process);
 
         if (newInstance.InstantiateWindowOnOpen)
-            await instanceWindowAsync(process);
+            await this.instanceWindowAsync(process);
 
         if (OnUpdateProgramArgumentsAsync != null)
             await OnUpdateProgramArgumentsAsync.Invoke(newInstance, arguments);
@@ -109,7 +109,7 @@ public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
     #endregion
 
     #region Window
-    private IEnumerable<Window> _windows => _processes.Where(x => x.Window is not null).Select(x => x.Window);
+    private IEnumerable<Window> _windows => this._processes.Where(x => x.Window is not null).Select(x => x.Window);
     public event Func<Window, Task> OnWindowOpenAsync;
     public event Func<Window, Task> OnWindowCloseAsync;
     public event Func<Window, Task> OnWindowFocusAsync;
@@ -121,14 +121,14 @@ public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
         process.Window = null;
         if (OnWindowCloseAsync != null)
             await OnWindowCloseAsync?.Invoke(window);
-        await FocusOtherWindowAsync();
+        await this.FocusOtherWindowAsync();
     }
 
     public async Task FocusOtherWindowAsync()
     {
-        if (!_windows.Any(w => !w.Hide))
+        if (!this._windows.Any(w => !w.Hide))
             return;
-        var window = _windows.Where(w => !w.Hide).MaxBy(x => x.Index);
+        var window = this._windows.Where(w => !w.Hide).MaxBy(x => x.Index);
 
         window.Focused = true;
         if (OnWindowFocusAsync != null)
@@ -141,22 +141,22 @@ public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
         window.Hide = true;
         if (OnWindowHideAsync != null)
             await OnWindowHideAsync.Invoke(window);
-        await FocusOtherWindowAsync();
+        await this.FocusOtherWindowAsync();
     }
 
     public async Task FocusWindowAsync(Window window)
     {
-        internalFocusWindow(window);
+        this.internalFocusWindow(window);
         await OnWindowFocusAsync?.Invoke(window);
 
-        if (_windows.Count() == 1)
+        if (this._windows.Count() == 1)
             return;
 
-        var oldWindow = _windows.Except([window]).Where(w => !w.Hide).MaxBy(x => x.Index);
+        var oldWindow = this._windows.Except([window]).Where(w => !w.Hide).MaxBy(x => x.Index);
         if (oldWindow is null)
             return;
 
-        internalFocusWindow(oldWindow, window);
+        this.internalFocusWindow(oldWindow, window);
 
         if (OnWindowFocusAsync is not null)
             await OnWindowFocusAsync?.Invoke(oldWindow);
@@ -173,7 +173,7 @@ public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
         logger.Log(LogLevel.Debug, "Index old window {0} and new window {1}", oldWindow.Index, newWindow.Index);
         if (oldWindow.Index > newWindow.Index)
         {
-            int tempIndex = oldWindow.Index;
+            var tempIndex = oldWindow.Index;
             oldWindow.Index = newWindow.Index;
             newWindow.Index = tempIndex;
         }
@@ -185,7 +185,7 @@ public class ProcessManager(ILogger<ProcessManager> logger) : IProcessManager
     async Task instanceWindowAsync(Process process)
     {
         var nextIndex = this._windows.Any() ? this._windows.Max(x => x.Index) + 1 : 1;
-        var newWindow = new Window() { Draggable = true, Resize = true, Title = $"Window {_windows.Count()}", Index = nextIndex, Focused = true };
+        var newWindow = new Window() { Draggable = true, Resize = true, Title = $"Window {this._windows.Count()}", Index = nextIndex, Focused = true };
         process.Window = newWindow;
         if (OnWindowOpenAsync != null)
             await OnWindowOpenAsync?.Invoke(newWindow);

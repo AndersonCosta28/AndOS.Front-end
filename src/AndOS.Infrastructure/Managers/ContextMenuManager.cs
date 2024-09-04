@@ -1,5 +1,4 @@
 ﻿using AndOS.Application.Components;
-using AndOS.Application.Interfaces;
 using Microsoft.AspNetCore.Components.Web;
 
 namespace AndOS.Infrastructure.Managers;
@@ -11,11 +10,11 @@ internal class ContextMenuManager : IContextMenuManager
 
     public event Func<MouseEventArgs, Task> OnSetItems;
 
-    public IList<MenuItem> GetItems() => ContextMenuItems;
+    public IList<MenuItem> GetItems() => this.ContextMenuItems;
 
     public async Task SetItems(IList<MenuItem> menus, MouseEventArgs args)
     {
-        ContextMenuItems = menus;
+        this.ContextMenuItems = menus;
         if (OnSetItems != null)
             await OnSetItems?.Invoke(args);
     }

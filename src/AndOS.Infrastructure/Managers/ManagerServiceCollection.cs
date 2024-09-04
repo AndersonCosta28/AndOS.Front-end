@@ -1,5 +1,4 @@
-﻿using AndOS.Application.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace AndOS.Infrastructure.Managers;
 

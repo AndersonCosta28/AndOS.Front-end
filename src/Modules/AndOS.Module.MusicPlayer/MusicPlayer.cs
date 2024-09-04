@@ -7,9 +7,9 @@ public class MusicPlayer : Program
 {
     public MusicPlayer() : base()
     {
-        Name = "Music Player";
-        AllowMultipleInstances = false;
-        Icon = builder =>
+        this.Name = "Music Player";
+        this.AllowMultipleInstances = false;
+        this.Icon = builder =>
         {
             builder.OpenComponent<FluentIcon<Icons.Regular.Size20.MusicNote1>>(0);
             builder.AddAttribute(1, "Value", new Icons.Regular.Size20.MusicNote1()); // Substitua pelo ícone desejado
@@ -18,6 +18,6 @@ public class MusicPlayer : Program
             builder.AddAttribute(4, "CustomColor", "#333");
             builder.CloseComponent();
         };
-        ComponentType = typeof(MusicPlayerComponent);
+        this.ComponentType = typeof(MusicPlayerComponent);
     }
 }

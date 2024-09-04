@@ -1,10 +1,8 @@
-﻿using AndOS.Application.Interfaces;
-using AndOS.Infrastructure.Api;
+﻿using AndOS.Infrastructure.Api;
 using AndOS.Infrastructure.Authentication;
 using AndOS.Infrastructure.CloudStorage;
 using AndOS.Infrastructure.Managers;
 using AndOS.Module.FileExplorer.Dialogs;
-using Blazored.LocalStorage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FluentUI.AspNetCore.Components;
@@ -21,8 +19,7 @@ public static class InfrastructureServiceExtensions
         services.AddManagerServices();
         services.AddCloudStorageServices();
         services.AddApiServices();
-        services.AddBlazoredLocalStorage();
-        IConfigurationSection apiConfiguration = configuration.GetSection("ApiConfiguration");
+        var apiConfiguration = configuration.GetSection("ApiConfiguration");
 
         services.AddHttpClient("API", client => client.BaseAddress = new Uri(configuration["ApiConfiguration:BaseUrl"]))
                 .AddResilienceHandler("default", b =>

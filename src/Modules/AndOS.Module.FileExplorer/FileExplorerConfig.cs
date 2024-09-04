@@ -15,50 +15,50 @@ public class FileExplorerConfig
 
     public void OnSingleSelect(SystemItemBaseComponent component, bool value)
     {
-        if (ItemToSelect == ItemTypeForSelection.Folder && !component.GetType().Equals(typeof(FolderItem)))
+        if (this.ItemToSelect == ItemTypeForSelection.Folder && !component.GetType().Equals(typeof(FolderItem)))
             return;
 
-        if (ItemToSelect == ItemTypeForSelection.File && !component.GetType().Equals(typeof(FileItem)))
+        if (this.ItemToSelect == ItemTypeForSelection.File && !component.GetType().Equals(typeof(FileItem)))
             return;
 
-        bool contains = ItemsSelect.Contains(component);
+        var contains = this.ItemsSelect.Contains(component);
         if (!contains && value)
         {
-            foreach (AndOSBaseComponent component2 in ItemsSelect)
+            foreach (AndOSBaseComponent component2 in this.ItemsSelect)
                 component2.Select(false);
 
-            ItemsSelect.Clear();
-            ItemsSelect.Add(component);
+            this.ItemsSelect.Clear();
+            this.ItemsSelect.Add(component);
             component.Select(true);
         }
         else
         {
-            foreach (SystemItemBaseComponent component2 in ItemsSelect.Where(componentInList => componentInList != component))
+            foreach (var component2 in this.ItemsSelect.Where(componentInList => componentInList != component))
                 component2.Select(false);
 
-            ItemsSelect.RemoveAll(componentInList => componentInList != component);
+            this.ItemsSelect.RemoveAll(componentInList => componentInList != component);
             component.Select(true);
         }
     }
 
     public void OnMultipleSelect(SystemItemBaseComponent component, bool value)
     {
-        if (ItemToSelect == ItemTypeForSelection.Folder && !component.GetType().Equals(typeof(FolderItem)))
+        if (this.ItemToSelect == ItemTypeForSelection.Folder && !component.GetType().Equals(typeof(FolderItem)))
             return;
 
-        if (ItemToSelect == ItemTypeForSelection.File && !component.GetType().Equals(typeof(FileItem)))
+        if (this.ItemToSelect == ItemTypeForSelection.File && !component.GetType().Equals(typeof(FileItem)))
             return;
 
-        if (!ItemsSelect.Contains(component) && value)
+        if (!this.ItemsSelect.Contains(component) && value)
         {
-            ItemsSelect.Add(component);
+            this.ItemsSelect.Add(component);
             component.Select(true);
             return;
         }
 
-        else if (ItemsSelect.Contains(component) && !value)
+        else if (this.ItemsSelect.Contains(component) && !value)
         {
-            ItemsSelect.Remove(component);
+            this.ItemsSelect.Remove(component);
             component.Select(false);
             return;
         }

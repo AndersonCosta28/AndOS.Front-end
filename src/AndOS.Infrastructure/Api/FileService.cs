@@ -79,12 +79,12 @@ internal class FileService(HttpClient httpClient,
             string url;
             if (param.Id == null || param.Id == Guid.Empty)
             {
-                var response = await CreateAsync(new(extension: param.Extension, name: param.Name, parentFolderId: param.ParentFolderId, size: param.Content.Length.ToString()), cancellationToken);
+                var response = await this.CreateAsync(new(extension: param.Extension, name: param.Name, parentFolderId: param.ParentFolderId, size: param.Content.Length.ToString()), cancellationToken);
                 url = response.Url;
             }
             else
             {
-                var response = await UpdateContentFileAsync(new(id: (Guid)param.Id), cancellationToken);
+                var response = await this.UpdateContentFileAsync(new(id: (Guid)param.Id), cancellationToken);
                 url = response.Url;
             }
 

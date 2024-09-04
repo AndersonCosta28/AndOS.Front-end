@@ -1,6 +1,4 @@
-﻿using AndOS.Application.Entities;
-using Microsoft.JSInterop;
-using System.Reflection;
+﻿using Microsoft.JSInterop;
 
 namespace AndOS.Infrastructure.Managers;
 internal class IndexDbAssemblyManager(IJSRuntime jSRuntime) : IAssemblyManager

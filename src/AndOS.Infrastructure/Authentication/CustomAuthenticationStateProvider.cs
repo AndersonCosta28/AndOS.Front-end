@@ -32,7 +32,7 @@ public class CustomAuthenticationStateProvider(IJSRuntime jsRuntime,
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
-        foreach (Claim claim in jwtToken.Claims)
+        foreach (var claim in jwtToken.Claims)
         {
             logger.Log(LogLevel.Debug, "{0}: {1}", claim.Type, claim.Value);
         }
@@ -52,12 +52,12 @@ public class CustomAuthenticationStateProvider(IJSRuntime jsRuntime,
         var identity = new ClaimsIdentity(jwtToken.Claims, "jwt");
         var user = new ClaimsPrincipal(identity);
         var authState = Task.FromResult(new AuthenticationState(user));
-        NotifyAuthenticationStateChanged(authState);
+        this.NotifyAuthenticationStateChanged(authState);
     }
 
     public void NotifyUserLogout()
     {
         var authState = Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
-        NotifyAuthenticationStateChanged(authState);
+        this.NotifyAuthenticationStateChanged(authState);
     }
 }

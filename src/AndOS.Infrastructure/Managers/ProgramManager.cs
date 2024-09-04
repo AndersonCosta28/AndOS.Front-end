@@ -12,18 +12,18 @@ internal class ProgramManager : IProgramManager
 
     public ProgramManager(ILogger<ProgramManager> logger, IAssemblyManager assemblyManager)
     {
-        _logger = logger;
+        this._logger = logger;
         this._assemblyManager = assemblyManager;
-        _programs.Add(new Module.FileExplorer.FileExplorer());
-        _programs.Add(new Module.Notepad.Notepad());
-        _programs.Add(new Module.UserConfiguration.UserConfiguration());
-        _programs.Add(new Module.VideoPlayer.VideoPlayer());
-        _programs.Add(new Module.MusicPlayer.MusicPlayer());
-        _programs.Add(new Module.ImageViewer.ImageViewer());
+        this._programs.Add(new Module.FileExplorer.FileExplorer());
+        this._programs.Add(new Module.Notepad.Notepad());
+        this._programs.Add(new Module.UserConfiguration.UserConfiguration());
+        this._programs.Add(new Module.VideoPlayer.VideoPlayer());
+        this._programs.Add(new Module.MusicPlayer.MusicPlayer());
+        this._programs.Add(new Module.ImageViewer.ImageViewer());
     }
 
     private readonly List<Assembly> _assemblies = [];
-    public List<Program> Programs => _programs.ToList();
+    public List<Program> Programs => this._programs.ToList();
     ObservableCollection<Program> _programs { get; } = [];
     public event Func<Program, Task> OnInstall;
     public event Func<Program, Task> OnUninstall;
@@ -32,42 +32,42 @@ internal class ProgramManager : IProgramManager
     {
         try
         {
-            var assemblies = await _assemblyManager.GetAll();
+            var assemblies = await this._assemblyManager.GetAll();
             foreach (var assemblyInfo in assemblies)
             {
                 var assembly = Assembly.Load(assemblyInfo.Binary);
-                await LoadProgramFromAssembly(assembly);
-                _logger.Log(LogLevel.Debug, $"Assembly loaded: {assemblyInfo.Name}");
+                await this.LoadProgramFromAssembly(assembly);
+                this._logger.Log(LogLevel.Debug, $"Assembly loaded: {assemblyInfo.Name}");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error loading assemblies from IndexedDB");
+            this._logger.LogError(ex, "Error loading assemblies from IndexedDB");
         }
     }
 
     public async Task RemoveExternalAssemblyAsync(Assembly assembly)
     {
-        foreach (var program in _programs.Where(x => x is Program && x.Assembly == assembly)
+        foreach (var program in this._programs.Where(x => x is Program && x.Assembly == assembly)
             .ToList())
         {
-            _programs.Remove(program);
+            this._programs.Remove(program);
             if (OnUninstall != null)
                 await OnUninstall?.Invoke(program);
         }
-        _assemblies.Remove(assembly);
-        await _assemblyManager.Remove(assembly);
+        this._assemblies.Remove(assembly);
+        await this._assemblyManager.Remove(assembly);
     }
 
     public bool VerifyIfExistsAssembly(Assembly assembly)
     {
-        var assemblyExisting = _assemblies.Find(x => x.GetName().Name == assembly.GetName().Name);
+        var assemblyExisting = this._assemblies.Find(x => x.GetName().Name == assembly.GetName().Name);
         return assemblyExisting != null;
     }
 
     public bool VerifyIfExistsAssembly(Assembly assembly, out Assembly assemblyExisting)
     {
-        assemblyExisting = _assemblies.Find(x => x.GetName().Name == assembly.GetName().Name);
+        assemblyExisting = this._assemblies.Find(x => x.GetName().Name == assembly.GetName().Name);
         return assemblyExisting != null;
     }
 
@@ -88,7 +88,7 @@ internal class ProgramManager : IProgramManager
         var attributesAssembly = assembly.GetCustomAttributes<AssemblyMetadataAttribute>().ToList();
 
         var isValidModule = attributesAssembly.Find(a => a.Key.Equals(AssemblyConsts.TagModule))?.Value;
-        _logger.Log(LogLevel.Debug, isValidModule?.ToString());
+        this._logger.Log(LogLevel.Debug, isValidModule?.ToString());
         return isValidModule == "true";
     }
 
@@ -102,18 +102,18 @@ internal class ProgramManager : IProgramManager
             // Filtrar tipos que herdam de Program
             foreach (var type in types.Where(t => t.IsAssignableTo(typeof(Program)) && !t.IsAbstract))
             {
-                _logger.Log(LogLevel.Debug, "Name type to instance {0}", type.FullName);
+                this._logger.Log(LogLevel.Debug, "Name type to instance {0}", type.FullName);
                 var programInstance = (Program)Activator.CreateInstance(type);
                 tempPrograms.Add(programInstance);
             }
             foreach (var program in tempPrograms)
             {
                 program.IsExternalProgram = true;
-                _programs.Add(program);
+                this._programs.Add(program);
                 if (OnInstall != null)
                     await OnInstall?.Invoke(program);
             }
-            _assemblies.Add(assembly);
+            this._assemblies.Add(assembly);
         }
         catch (ReflectionTypeLoadException ex)
         {
@@ -122,28 +122,28 @@ internal class ProgramManager : IProgramManager
         }
         finally
         {
-            _logger.Log(LogLevel.Debug, "{0} programs loaders from assembly: {1}", _programs.Count, assembly.FullName);
+            this._logger.Log(LogLevel.Debug, "{0} programs loaders from assembly: {1}", this._programs.Count, assembly.FullName);
         }
     }
 
     public async Task AddExternalProgramAsync(byte[] assemblybinary)
     {
         var assembly = Assembly.Load(assemblybinary);
-        await LoadProgramFromAssembly(assembly);
-        await _assemblyManager.Add(assembly, assemblybinary);
+        await this.LoadProgramFromAssembly(assembly);
+        await this._assemblyManager.Add(assembly, assemblybinary);
     }
 
     public async Task AddExternalProgramAsync(Assembly assembly)
     {
 
         var binaryData = File.ReadAllBytes(assembly.Location);
-        await AddExternalProgramAsync(binaryData);
+        await this.AddExternalProgramAsync(binaryData);
     }
 
     public async Task AddExternalProgramAsync(string path)
     {
         FileInfo file = new(path);
         var binaryData = File.ReadAllBytes(file.FullName);
-        await AddExternalProgramAsync(binaryData);
+        await this.AddExternalProgramAsync(binaryData);
     }
 }

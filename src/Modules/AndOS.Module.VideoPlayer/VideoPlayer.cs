@@ -7,9 +7,9 @@ public class VideoPlayer : Program
 {
     public VideoPlayer() : base()
     {
-        Name = "Video player";
-        AllowMultipleInstances = false;
-        Icon = builder =>
+        this.Name = "Video player";
+        this.AllowMultipleInstances = false;
+        this.Icon = builder =>
         {
             builder.OpenComponent<FluentIcon<Icons.Regular.Size20.VideoClip>>(0);
             builder.AddAttribute(1, "Value", new Icons.Regular.Size20.VideoClip());
@@ -18,7 +18,7 @@ public class VideoPlayer : Program
             builder.AddAttribute(4, "CustomColor", "#333");
             builder.CloseComponent();
         };
-        Extensions = ["mp4", "webm", "ogg"];
-        ComponentType = typeof(VideoPlayerComponent);
+        this.Extensions = ["mp4", "webm", "ogg"];
+        this.ComponentType = typeof(VideoPlayerComponent);
     }
 }

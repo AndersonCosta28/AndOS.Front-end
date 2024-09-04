@@ -12,9 +12,9 @@ public class OpenFolderById : IOpenFolderParams
 
     public OpenFolderById(Guid id, NavigationType navigationType, bool clearNavigationHistory = false, bool clearFowardHistory = false)
     {
-        Id = id;
-        NavigationType = navigationType;
-        ClearNavigationHistory = clearNavigationHistory;
-        ClearFowardHistory = clearFowardHistory;
+        this.Id = id;
+        this.NavigationType = navigationType;
+        this.ClearNavigationHistory = clearNavigationHistory;
+        this.ClearFowardHistory = clearFowardHistory;
     }
 }

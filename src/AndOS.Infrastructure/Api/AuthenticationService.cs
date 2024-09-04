@@ -42,12 +42,12 @@ public class AuthenticationService(
         // Verifica se a senha e a confirmação da senha são iguais
         if (password != confirmPassword)
         {
-            string message = "As senhas não coincidem.";
+            var message = "As senhas não coincidem.";
             throw new Exception(message);
         }
 
         var request = new RegisterRequest() { Email = email, Password = password, UserName = userName };
-        HttpResponseMessage response = await httpClient.PostAsJsonAsync($"{_endpoint}/register", request, cancellationToken: cancellationToken);
+        var response = await httpClient.PostAsJsonAsync($"{_endpoint}/register", request, cancellationToken: cancellationToken);
         await response.HandleResponse(cancellationToken);
         navigationManager.NavigateTo(RoutesConsts.Login);
     }
