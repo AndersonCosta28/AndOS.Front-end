@@ -3,15 +3,15 @@ using AndOS.Domain.Consts;
 using AndOS.Infrastructure.Authentication;
 using AndOS.Shared.Requests.Auth.Login;
 using AndOS.Shared.Requests.Auth.Register;
-using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
 using System.Net.Http.Headers;
 
 namespace AndOS.Infrastructure.Api;
 
 public class AuthenticationService(
-    ILocalStorageService localStorage,
+    IJSRuntime jsRuntime,
     ILogger<AuthenticationService> logger,
     HttpClient httpClient,
     NavigationManager navigationManager,
@@ -24,8 +24,8 @@ public class AuthenticationService(
         var response = await httpClient.PostAsJsonAsync($"{_endpoint}/login", new LoginRequest() { Email = email, Password = password });
         response.EnsureSuccessStatusCode();
         var responseLogin = await response.Content.ReadFromJsonAsync<LoginResponse>(cancellationToken);
-        
-        await localStorage.SetItemAsync("authToken", responseLogin.Token, cancellationToken);
+
+        await jsRuntime.InvokeVoidAsync("localStorage.setItem", "authToken", responseLogin.Token);
 
         // Notifica o AuthenticationStateProvider sobre a autenticação do usuário
         authenticationStateProvider.NotifyUserAuthentication(responseLogin.Token);
@@ -55,7 +55,7 @@ public class AuthenticationService(
     public async Task Logout()
     {
         // Remove o token do armazenamento local
-        await localStorage.RemoveItemAsync("authToken");
+        await jsRuntime.InvokeVoidAsync("localStorage.removeItem", "authToken");
 
         // Notifica o AuthenticationStateProvider sobre o logout do usuário
         authenticationStateProvider.NotifyUserLogout();

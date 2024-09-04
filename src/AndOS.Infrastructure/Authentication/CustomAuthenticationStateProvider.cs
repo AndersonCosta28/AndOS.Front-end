@@ -1,26 +1,21 @@
-﻿using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 
 namespace AndOS.Infrastructure.Authentication;
 
-public class CustomAuthenticationStateProvider(ILocalStorageService localStorage,
+public class CustomAuthenticationStateProvider(IJSRuntime jsRuntime,
     HttpClient httpClient,
     ILogger<CustomAuthenticationStateProvider> logger,
     NavigationManager navigationManager) : AuthenticationStateProvider
 {
-    private readonly ILocalStorageService _localStorage = localStorage;
-    private readonly HttpClient _httpClient = httpClient;
-    private readonly ILogger<CustomAuthenticationStateProvider> _logger = logger;
-    private readonly NavigationManager _navigationManager = navigationManager;
-
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var token = await _localStorage.GetItemAsync<string>("authToken");
+        var token = await jsRuntime.InvokeAsync<string>("localStorage.getItem", "authToken");
 
         if (string.IsNullOrWhiteSpace(token))
         {
@@ -32,19 +27,19 @@ public class CustomAuthenticationStateProvider(ILocalStorageService localStorage
 
         if (jwtToken.ValidTo < DateTime.UtcNow)
         {
-            await _localStorage.RemoveItemAsync("authToken");
-            _navigationManager.NavigateTo("/login");
+            await jsRuntime.InvokeVoidAsync("localStorage.removeItem", "authToken");
+            navigationManager.NavigateTo("/login");
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
         foreach (Claim claim in jwtToken.Claims)
         {
-            _logger.Log(LogLevel.Debug, "{0}: {1}", claim.Type, claim.Value);
+            logger.Log(LogLevel.Debug, "{0}: {1}", claim.Type, claim.Value);
         }
         var identity = new ClaimsIdentity(jwtToken.Claims, "jwt");
         var user = new ClaimsPrincipal(identity);
 
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         return new AuthenticationState(user);
     }
