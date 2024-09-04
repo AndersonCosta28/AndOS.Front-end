@@ -21,7 +21,7 @@ public class AuthenticationService(
 
     public async Task Login(string email, string password, CancellationToken cancellationToken = default)
     {
-        var response = await httpClient.PostAsJsonAsync($"{_endpoint}/login", new LoginRequest() { Email = email, Password = password });
+        var response = await httpClient.PostAsJsonAsync($"{_endpoint}/login", new LoginRequest() { Email = email, Password = password }, cancellationToken: cancellationToken);
         response.EnsureSuccessStatusCode();
         var responseLogin = await response.Content.ReadFromJsonAsync<LoginResponse>(cancellationToken);
 
